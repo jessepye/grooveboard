@@ -3,7 +3,7 @@
 **Core User Experience:**
 
 - Extremely simple, intuitive interface (target: usable by an 11-year-old).
-- Single, non-zoomable page/canvas per board.
+- Multiple, non-zoomable pages/canvases per board.
 - Instant, account-free access for basic use.
 - Optional sign-in to save boards/settings.
 - Monetization via ads (for free users) and a paid ad-free tier.
