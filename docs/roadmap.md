@@ -9,7 +9,7 @@
 * **Milestone 1: Basic Real-time Drawing on AWS**
     * **Goal:** Establish the simplest possible drawing functionality shared in real-time between anonymous users, with an initial focus on backend architecture.
     * **Key Features (Frontend - Ultra Simple):**
-        * Single, non-zoomable canvas.
+        * Non-zoomable canvas with mutiple pages.
         * Basic Pen Tool: Draw freehand lines (default color/thickness).
         * Eraser Tool (Basic): Erase drawings.
         * Clear Board button.
@@ -20,7 +20,7 @@
             * Handles real-time broadcasting of drawing data (coordinates, tool actions).
             * Containerize this service (Docker).
         * **Initial Deployment:** Deploy the containerized Collaboration Service to AWS (e.g., ECS or a single EC2 instance initially for simplicity before full Kubernetes).
-        * **Frontend:** Basic web client that connects to the WebSocket service and renders drawings.
+        * **Frontend:** Basic web client that connects to the WebSocket service and renders drawings. React, typescript.
     * **User Experience:**
         * Users visit the site and are instantly on a new, unique, shareable whiteboard.
         * No accounts needed for this phase.
