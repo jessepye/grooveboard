@@ -16,7 +16,7 @@
     * **Key Architecture & Backend Tasks:**
         * **AWS Setup:** Basic VPC, EC2 instances (or EKS LATER, start simple if needed), and necessary security groups.
         * **Microservice 1 (Collaboration Service):**
-            * Develop a WebSocket service (e.g., using Node.js with `ws` or Python with FastAPI/Starlette).
+            * Develop a WebSocket service 
             * Handles real-time broadcasting of drawing data (coordinates, tool actions).
             * Containerize this service (Docker).
         * **Initial Deployment:** Deploy the containerized Collaboration Service to AWS (e.g., ECS or a single EC2 instance initially for simplicity before full Kubernetes).
