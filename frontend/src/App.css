@@ -2,37 +2,55 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background-color: #f0f0f0;
+  padding: 10px; /* Reduced padding */
+  color: #333;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 0; /* Remove margin if App-body is directly after */
 }
 
-.App-link {
-  color: #61dafb;
+.App-body {
+  display: flex; /* Use flexbox for layout */
+  flex-direction: row; /* Arrange children (toolbar and main content) in a row */
+  min-height: calc(100vh - 70px); /* Adjust 70px based on your header's actual height */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Styling for the Toolbar when it's a sidebar */
+.App-body > div[style*="padding: 10px"] { /* This selector is a bit fragile; consider adding a className to Toolbar's div */
+  width: 150px; /* Fixed width for the toolbar */
+  padding: 10px;
+  border-right: 1px solid #ccc; /* Separator line */
+  background-color: #f9f9f9;
+  height: 100%; /* Make toolbar take full height of App-body */
+  box-sizing: border-box;
+  text-align: left;
 }
+
+.App-body > div[style*="padding: 10px"] h3 {
+  margin-top: 0;
+}
+
+.App-main-content {
+  flex-grow: 1; /* Allow the main content to take up the remaining space */
+  padding: 20px;
+  background-color: #ffffff;
+  overflow-y: auto; /* If content overflows */
+}
+
+/* If you add a className to Toolbar's main div e.g., <div className="App-toolbar" ...> */
+/*
+.App-toolbar {
+  width: 150px;
+  padding: 10px;
+  border-right: 1px solid #ccc;
+  background-color: #f9f9f9;
+  height: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.App-toolbar h3 {
+  margin-top: 0;
+}
+*/

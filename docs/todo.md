@@ -8,7 +8,7 @@
 
 * [x] Define initial frontend structure (React/TypeScript).
 * [x] Create placeholder files for core frontend components (`App.tsx`, `Toolbar.tsx`, `Board.tsx`, `CanvasPage.tsx`) and basic CSS.
-* [ ] **Implement Basic Frontend Component UI & State:**
+* [x] **Implement Basic Frontend Component UI & State:**
     * Lay out the basic UI for `Toolbar`, `Board`, and `CanvasPage`.
     * Set up initial state management (e.g., selected tool) within components or using React Context.
 
@@ -19,10 +19,10 @@
 ### Frontend (Ultra Simple)
 
 * **Canvas & Drawing Logic:**
-    * [ ] Implement the non-zoomable HTML5 canvas in `CanvasPage.tsx`.
-    * [ ] **Pen Tool:** Implement freehand line drawing on the canvas (with default color/thickness).
-    * [ ] **Eraser Tool:** Implement basic erasing functionality on the canvas.
-    * [ ] **Clear Board Button:** Implement functionality for the "Clear Board" button in `Toolbar.tsx` to clear the canvas.
+    * [x] Implement the non-zoomable HTML5 canvas in `CanvasPage.tsx`.
+    * [x] **Pen Tool:** Implement freehand line drawing on the canvas (with default color/thickness).
+    * [x] **Eraser Tool:** Implement basic erasing functionality on the canvas.
+    * [x] **Clear Board Button:** Implement functionality for the "Clear Board" button in `Toolbar.tsx` to clear the canvas.
     * *Note: Remember to apply Test-Driven Development (TDD) principles when implementing these features.*
 * **Multi-page Canvas (Conceptual/Basic Setup):**
     * [ ] Plan or implement basic state/logic for handling multiple pages/canvases per board (even if only one is visible at a time initially).
