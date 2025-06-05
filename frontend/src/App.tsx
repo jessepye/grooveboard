@@ -1,28 +1,48 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import './App.css';
-import Board from './components/Board'; // Assuming Board.tsx is in the components directory
-import Toolbar, { Tool } from './components/Toolbar'; // Assuming Toolbar.tsx is in the components directory
-// If you are managing state in Board.tsx for the toolbar, you'll need to lift it here
-// or use Context as previously discussed.
-// For this example, let's assume Board.tsx still internally manages the toolbar state
-// or that we will pass props down from App.tsx if state is lifted here.
+import Board from './components/Board';
+import Toolbar from './components/Toolbar'; // Assuming Toolbar.tsx is in src/ or components/
+import { Tool } from './components/Tool'; // Assuming Toolbar.tsx is in src/ or components/
 
-// For simplicity in this step, let's assume Board handles its own Toolbar interaction
-// or we'll pass down props from a state defined here.
-// Let's manage the selectedTool and clearBoard at App level for this example.
+// Define a type for a single stroke/path
+export interface Stroke {
+  id: string; // Unique ID for each stroke, useful for network and React keys
+  tool: Tool | 'pen'; // Could be 'pen' or 'eraser' (though eraser modifies paths array)
+  points: { x: number; y: number }[];
+  color: string;
+  width: number;
+}
 
 const App: React.FC = () => {
-  const [selectedTool, setSelectedTool] = React.useState<Tool>('pen');
-  const [clearCounter, setClearCounter] = React.useState(0); // To trigger clear
+  const [selectedTool, setSelectedTool] = useState<Tool>('pen');
+  const [paths, setPaths] = useState<Stroke[]>([]); // Store all completed strokes
 
-  const handleToolChange = (tool: Tool) => {
+  // Default Pen settings
+  const [penColor, setPenColor] = useState<string>('#000000');
+  const [penWidth, setPenWidth] = useState<number>(5);
+
+  // Eraser settings
+  const [eraserWidth, setEraserWidth] = useState<number>(20);
+
+
+  const handleToolChange = useCallback((tool: Tool) => {
     setSelectedTool(tool);
-  };
+  }, []);
 
-  const handleClearBoard = () => {
-    console.log('App: Clear action triggered');
-    setClearCounter(prev => prev + 1); // Change this to trigger re-render/effect in CanvasPage
-  };
+  const handleClearBoard = useCallback(() => {
+    setPaths([]); // Clear all paths
+  }, []);
+
+  // Callback for when a new path is completed by CanvasPage
+  const handleAddPath = useCallback((newPath: Stroke) => {
+    setPaths((prevPaths) => [...prevPaths, newPath]);
+  }, []);
+
+  // Callback for when paths are modified by the eraser
+  const handleEraseStrokes = useCallback((updatedPaths: Stroke[]) => {
+    setPaths(updatedPaths);
+  }, []);
+
 
   return (
     <div className="App">
@@ -34,13 +54,22 @@ const App: React.FC = () => {
           selectedTool={selectedTool}
           onToolChange={handleToolChange}
           onClearBoard={handleClearBoard}
+          penColor={penColor}
+          onPenColorChange={setPenColor}
+          penWidth={penWidth}
+          onPenWidthChange={setPenWidth}
+          eraserWidth={eraserWidth}
+          onEraserWidthChange={setEraserWidth}
         />
         <main className="App-main-content">
           <Board
             selectedTool={selectedTool}
-            clearCounter={clearCounter} // Pass this down
-            onToolChange={handleToolChange} // Board might not need this if CanvasPage gets tool from prop
-            onClearBoard={handleClearBoard} // Board might not need this if CanvasPage gets clear from prop
+            paths={paths} // Pass current paths
+            onAddPath={handleAddPath} // Callback to add new path
+            onEraseStrokes={handleEraseStrokes} // Callback to update paths after erase
+            penColor={penColor}
+            penWidth={penWidth}
+            eraserWidth={eraserWidth}
           />
         </main>
       </div>

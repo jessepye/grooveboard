@@ -1,34 +1,39 @@
 import React from 'react';
-import CanvasPage from './CanvasPage';   // Assuming CanvasPage.tsx is in the same directory
-import { Tool } from './Toolbar';
+import CanvasPage from './CanvasPage';
+import { Stroke } from '../App'; // Assuming types are exported from App.tsx or a types file
+import { Tool } from './Tool'; // Assuming Toolbar.tsx is in src/ or components/
 
 interface BoardProps {
   selectedTool: Tool;
-  clearCounter: number; // To trigger clear effect in CanvasPage
-  // These might be removed if App directly passes to CanvasPage or uses context
-  onToolChange: (tool: Tool) => void;
-  onClearBoard: () => void;
+  paths: Stroke[];
+  onAddPath: (newPath: Stroke) => void;
+  onEraseStrokes: (updatedPaths: Stroke[]) => void;
+  penColor: string;
+  penWidth: number;
+  eraserWidth: number;
 }
 
-const Board: React.FC<BoardProps> = ({ selectedTool, clearCounter, onClearBoard }) => {
-  // Toolbar is now rendered in App.tsx
-  // Board is primarily responsible for the canvas area
-
+const Board: React.FC<BoardProps> = ({
+  selectedTool,
+  paths,
+  onAddPath,
+  onEraseStrokes,
+  penColor,
+  penWidth,
+  eraserWidth,
+}) => {
   return (
     <div>
-      {/*
-        The Toolbar component is now rendered by App.tsx,
-        so we remove it from here.
-        Board will just render the CanvasPage(s).
-      */}
       <CanvasPage
         selectedTool={selectedTool}
-        clearCounter={clearCounter} // Pass the counter
-        // onClearBoard is now handled by App, which updates clearCounter
+        paths={paths}
+        onAddPath={onAddPath}
+        onEraseStrokes={onEraseStrokes}
+        penColor={penColor}
+        penWidth={penWidth}
+        eraserWidth={eraserWidth}
+        // clearCounter is now handled by paths being an empty array
       />
-      {/* Later, this could map over an array of pages:
-        pages.map(page => <CanvasPage key={page.id} ... />)
-      */}
     </div>
   );
 };
