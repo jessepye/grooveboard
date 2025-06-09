@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tool } from './Tool'; // Assuming type is defined or moved
+import { Tool } from './Tool';
 
 interface ToolbarProps {
   selectedTool: Tool;
@@ -11,6 +11,11 @@ interface ToolbarProps {
   onPenWidthChange: (width: number) => void;
   eraserWidth: number;
   onEraserWidthChange: (width: number) => void;
+  onPreviousPage: () => void;
+  onNextPage: () => void;
+  onNewPage: () => void;
+  currentPage: number;
+  totalPages: number;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -23,6 +28,11 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onPenWidthChange,
   eraserWidth,
   onEraserWidthChange,
+  onPreviousPage,
+  onNextPage,
+  onNewPage,
+  currentPage,
+  totalPages,
 }) => {
   return (
     <div className="App-toolbar bg-gray-50 p-4 space-y-6">
@@ -101,6 +111,18 @@ const Toolbar: React.FC<ToolbarProps> = ({
           className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-md transition-colors"
         >
           Clear Canvas
+        </button>
+      </div>
+
+      <div className="page-navigation">
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">Pages</h3>
+        <div className="flex items-center justify-between">
+          <button onClick={onPreviousPage} disabled={currentPage === 0}>Prev</button>
+          <span>{currentPage + 1} / {totalPages}</span>
+          <button onClick={onNextPage} disabled={currentPage === totalPages - 1}>Next</button>
+        </div>
+        <button onClick={onNewPage} className="w-full mt-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md transition-colors">
+          New Page
         </button>
       </div>
     </div>

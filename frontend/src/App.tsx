@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import './App.css';
 import Board from './components/Board';
-import Toolbar from './components/Toolbar'; // Assuming Toolbar.tsx is in src/ or components/
-import { Tool } from './components/Tool'; // Assuming Toolbar.tsx is in src/ or components/
+import Toolbar from './components/Toolbar';
+import { Tool } from './components/Tool';
 
 // Define a type for a single stroke/path
 export interface Stroke {
@@ -15,7 +15,8 @@ export interface Stroke {
 
 const App: React.FC = () => {
   const [selectedTool, setSelectedTool] = useState<Tool>('pen');
-  const [paths, setPaths] = useState<Stroke[]>([]); // Store all completed strokes
+  const [pages, setPages] = useState<Stroke[][]>([[]]); // Array of pages, each page is an array of strokes
+  const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
 
   // Default Pen settings
   const [penColor, setPenColor] = useState<string>('#000000');
@@ -30,18 +31,47 @@ const App: React.FC = () => {
   }, []);
 
   const handleClearBoard = useCallback(() => {
-    setPaths([]); // Clear all paths
-  }, []);
+    setPages(prevPages => {
+      const newPages = [...prevPages];
+      newPages[currentPageIndex] = [];
+      return newPages;
+    });
+  }, [currentPageIndex]);
 
   // Callback for when a new path is completed by CanvasPage
   const handleAddPath = useCallback((newPath: Stroke) => {
-    setPaths((prevPaths) => [...prevPaths, newPath]);
-  }, []);
+    setPages(prevPages => {
+      const newPages = [...prevPages];
+      newPages[currentPageIndex] = [...newPages[currentPageIndex], newPath];
+      return newPages;
+    });
+  }, [currentPageIndex]);
 
   // Callback for when paths are modified by the eraser
   const handleEraseStrokes = useCallback((updatedPaths: Stroke[]) => {
-    setPaths(updatedPaths);
-  }, []);
+    setPages(prevPages => {
+      const newPages = [...prevPages];
+      newPages[currentPageIndex] = updatedPaths;
+      return newPages;
+    });
+  }, [currentPageIndex]);
+
+  const handleAddPage = () => {
+    setPages(prevPages => [...prevPages, []]);
+    setCurrentPageIndex(pages.length);
+  };
+
+  const handleNextPage = () => {
+    if (currentPageIndex < pages.length - 1) {
+      setCurrentPageIndex(currentPageIndex + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPageIndex > 0) {
+      setCurrentPageIndex(currentPageIndex - 1);
+    }
+  };
 
 
   return (
@@ -60,11 +90,16 @@ const App: React.FC = () => {
           onPenWidthChange={setPenWidth}
           eraserWidth={eraserWidth}
           onEraserWidthChange={setEraserWidth}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+          onNewPage={handleAddPage}
+          currentPage={currentPageIndex}
+          totalPages={pages.length}
         />
         <main className="App-main-content">
           <Board
             selectedTool={selectedTool}
-            paths={paths} // Pass current paths
+            paths={pages[currentPageIndex]} // Pass current page's paths
             onAddPath={handleAddPath} // Callback to add new path
             onEraseStrokes={handleEraseStrokes} // Callback to update paths after erase
             penColor={penColor}
