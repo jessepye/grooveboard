@@ -25,9 +25,9 @@
     * [x] **Clear Board Button:** Implement functionality for the "Clear Board" button in `Toolbar.tsx` to clear the canvas.
     * *Note: Remember to apply Test-Driven Development (TDD) principles when implementing these features.*
 * **Multi-page Canvas (Conceptual/Basic Setup):**
-    * [ ] implement basic state/logic for handling multiple pages/canvases per board (even if only one is visible at a time initially).
+    * [x] implement basic state/logic for handling multiple pages/canvases per board (even if only one is visible at a time initially).
 * **WebSocket Integration (Frontend Side):**
-    * [ ] Install `socket.io-client`.
+    * [x] Install `socket.io-client`.
     * [ ] Implement logic to connect to the backend WebSocket Collaboration Service.
     * [ ] Send drawing/erasing/clearing actions to the backend via WebSocket.
     * [ ] Receive drawing/erasing/clearing actions from the backend and render them on the canvas.
