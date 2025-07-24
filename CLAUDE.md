@@ -97,6 +97,40 @@ The project is in Phase 1: Core Drawing & Real-time Anonymous Collaboration Foun
 - Phase 3: User authentication, premium features
 - Phase 4: Monitoring, optimization, advanced cloud features
 
+## Observability Stack Integration
+
+GrooveBoard will integrate with Visa's observability infrastructure using industry-standard tools:
+
+### Metrics Collection (Prometheus + M3DB)
+- **Prometheus**: Collect application metrics (drawing operations, user sessions, WebSocket connections)
+- **M3DB**: Long-term scalable storage for Prometheus metrics
+- Monitor canvas performance, stroke counts, page switches, and collaboration patterns
+
+### Distributed Tracing (OpenTelemetry)
+- **OpenTelemetry SDK**: Instrument React frontend and future backend services
+- **OTel Collector**: Aggregate and export telemetry data
+- Trace user interactions: input → WebSocket → canvas updates → collaboration events
+
+### Logging (OpenSearch Migration)
+- **Current**: Elastic + Splunk
+- **Target**: OpenSearch for centralized log aggregation
+- Structured logging for user actions, errors, WebSocket events, and system diagnostics
+
+### Analytics Datastore (ClickHouse)
+- Store user behavior analytics and drawing patterns
+- Fast queries for real-time dashboards and collaboration insights
+- Track usage metrics for product optimization
+
+### Implementation Plan
+1. Add OpenTelemetry SDK to React frontend
+2. Instrument drawing pipeline and WebSocket events
+3. Replace console.log with structured logging
+4. Set up Prometheus metrics collection
+5. Configure OTel Collector for data aggregation
+6. Design ClickHouse schema for behavioral analytics
+
+This observability stack will provide comprehensive monitoring across the entire collaborative whiteboard experience.
+
 ## Testing
 
 Run tests with `npm test` in the frontend directory. Follow TDD practices by writing tests first for all new features.

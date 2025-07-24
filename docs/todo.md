@@ -28,9 +28,9 @@
     * [x] implement basic state/logic for handling multiple pages/canvases per board (even if only one is visible at a time initially).
 * **WebSocket Integration (Frontend Side):**
     * [x] Install `socket.io-client`.
-    * [ ] Implement logic to connect to the backend WebSocket Collaboration Service.
-    * [ ] Send drawing/erasing/clearing actions to the backend via WebSocket.
-    * [ ] Receive drawing/erasing/clearing actions from the backend and render them on the canvas.
+    * [x] Implement logic to connect to the backend WebSocket Collaboration Service.
+    * [x] Send drawing/erasing/clearing actions to the backend via WebSocket.
+    * [x] Receive drawing/erasing/clearing actions from the backend and render them on the canvas.
 
 ### Backend (Collaboration Service & AWS)
 
