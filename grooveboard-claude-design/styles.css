@@ -1,0 +1,303 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GrooveBoard — design system
+   Vibe: warm, refined, calm. A grown-up sketch tool with personality.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Palette — Warm default (paper-like, soft cream) */
+  --gb-bg: #F5F2EC;
+  --gb-bg-deep: #EAE5DA;
+  --gb-paper: #FBFAF6;
+  --gb-ink: #1F1D1A;
+  --gb-ink-soft: #6E695E;
+  --gb-line: #E0DACB;
+  --gb-accent: #C75A3C;
+
+  /* Brand swatches — softer, more sophisticated */
+  --gb-tomato:    #C75A3C;
+  --gb-mango:     #E8A53D;
+  --gb-lemon:     #E8D26E;
+  --gb-mint:      #6FB397;
+  --gb-sky:       #5A9DC2;
+  --gb-grape:     #7B6BB0;
+  --gb-bubblegum: #C57BA0;
+
+  /* Strokes & shadows — refined, not chunky */
+  --gb-stroke: 1px solid var(--gb-line);
+  --gb-stroke-strong: 1.5px solid var(--gb-ink);
+  --gb-shadow-sm: 0 1px 2px rgba(31,29,26,0.08);
+  --gb-shadow-md: 0 2px 8px rgba(31,29,26,0.08), 0 1px 2px rgba(31,29,26,0.06);
+  --gb-shadow-lg: 0 8px 24px rgba(31,29,26,0.10), 0 2px 4px rgba(31,29,26,0.06);
+  --gb-radius: 10px;
+  --gb-radius-lg: 14px;
+  --gb-radius-pill: 999px;
+
+  --gb-font-display: "Fraunces", "Recoleta", Georgia, serif;
+  --gb-font-body: "Inter", "Nunito", system-ui, sans-serif;
+  --gb-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+[data-theme="ocean"] {
+  --gb-bg: #EEF3F5;
+  --gb-bg-deep: #DCE6EA;
+  --gb-paper: #F8FAFB;
+  --gb-line: #D2DCE2;
+  --gb-accent: #3F7A95;
+}
+[data-theme="grape"] {
+  --gb-bg: #F1EEF4;
+  --gb-bg-deep: #E2DCE9;
+  --gb-paper: #FAF8FC;
+  --gb-line: #DAD2E2;
+  --gb-accent: #6E5C95;
+}
+[data-theme="mint"] {
+  --gb-bg: #EEF3EF;
+  --gb-bg-deep: #DCE6DF;
+  --gb-paper: #F7FAF8;
+  --gb-line: #D0DCD3;
+  --gb-accent: #4F8A6D;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  font-family: var(--gb-font-body);
+  color: var(--gb-ink);
+  background: var(--gb-bg);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  height: 100%;
+}
+
+button { font-family: inherit; cursor: pointer; }
+
+/* ── Logo ──────────────────────────────────────────── */
+.gb-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--gb-font-display);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--gb-ink);
+}
+.gb-logo-mark {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--gb-accent);
+  position: relative;
+  flex-shrink: 0;
+}
+.gb-logo-mark::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1.5px solid var(--gb-paper);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+.gb-logo-mark::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  background: var(--gb-paper);
+  border-radius: 50%;
+  opacity: 0.85;
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+.gb-btn {
+  appearance: none;
+  border: var(--gb-stroke);
+  background: var(--gb-paper);
+  color: var(--gb-ink);
+  font-family: var(--gb-font-body);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 9px 16px;
+  border-radius: var(--gb-radius);
+  box-shadow: var(--gb-shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background .15s, box-shadow .15s, transform .08s;
+}
+.gb-btn:hover { box-shadow: var(--gb-shadow-md); background: var(--gb-paper); }
+.gb-btn:active { transform: translateY(1px); }
+.gb-btn.gb-btn-primary {
+  background: var(--gb-ink);
+  color: var(--gb-paper);
+  border-color: var(--gb-ink);
+}
+.gb-btn.gb-btn-primary:hover { background: #2D2A26; }
+.gb-btn.gb-btn-ghost { background: transparent; box-shadow: none; border-color: transparent; }
+.gb-btn.gb-btn-ghost:hover { background: var(--gb-bg-deep); box-shadow: none; }
+
+/* ── Card ──────────────────────────────────────────── */
+.gb-card {
+  background: var(--gb-paper);
+  border: var(--gb-stroke);
+  border-radius: var(--gb-radius-lg);
+  box-shadow: var(--gb-shadow-sm);
+}
+
+.gb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--gb-radius-pill);
+  background: var(--gb-bg-deep);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gb-ink-soft);
+}
+
+/* ── Avatars ──────────────────────────────────────────── */
+.gb-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--gb-paper);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* ── Whiteboard surface ──────────────────────────────────────────── */
+.gb-canvas-wrap {
+  position: absolute;
+  inset: 0;
+  background: var(--gb-bg-deep);
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The "mat" — soft surface around the page, like a desk */
+.gb-canvas-mat {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Generous breathing room so the page never touches a chrome edge */
+  padding: 80px;
+  min-width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+/* The page itself — a fixed landscape rectangle, like a sheet of paper */
+.gb-page {
+  position: relative;
+  background: var(--gb-paper);
+  border-radius: 6px;
+  box-shadow:
+    0 1px 2px rgba(31,29,26,0.08),
+    0 8px 24px rgba(31,29,26,0.10),
+    0 24px 56px rgba(31,29,26,0.08);
+  overflow: hidden;
+  flex-shrink: 0;
+  transform-origin: center center;
+  transition: transform .22s cubic-bezier(.2,.7,.2,1);
+}
+.gb-page.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--gb-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--gb-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.gb-page.bg-dots {
+  background-image: radial-gradient(var(--gb-line) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+.gb-page.bg-lines {
+  background-image: linear-gradient(to bottom, transparent 31px, var(--gb-line) 32px);
+  background-size: 100% 32px;
+}
+
+/* ── Sticky note ──────────────────────────────────────────── */
+.gb-sticky {
+  position: absolute;
+  width: 180px;
+  min-height: 180px;
+  padding: 18px 16px 14px;
+  font-family: var(--gb-font-body);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--gb-ink);
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(31,29,26,0.12), 0 6px 16px rgba(31,29,26,0.08);
+  cursor: grab;
+  user-select: none;
+  word-break: break-word;
+  line-height: 1.4;
+  transform-origin: center center;
+}
+.gb-sticky:active { cursor: grabbing; }
+.gb-sticky.dragging { box-shadow: 0 6px 14px rgba(31,29,26,0.18), 0 16px 32px rgba(31,29,26,0.12); z-index: 100; }
+.gb-sticky textarea {
+  width: 100%;
+  height: 140px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  resize: none;
+  outline: none;
+}
+
+/* ── Live cursors ──────────────────────────────────────────── */
+.gb-cursor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  transition: left 1.6s cubic-bezier(.5,.1,.4,.9), top 1.6s cubic-bezier(.5,.1,.4,.9);
+}
+.gb-cursor-pointer {
+  width: 20px; height: 20px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+.gb-cursor-name {
+  display: inline-block;
+  margin-top: -2px;
+  margin-left: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ── Modals ──────────────────────────────────────────── */
+.gb-modal-back {
+  position: fixed; inset: 0;
+  background: rgba(31, 29, 26, 0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2000;
+  animation: gb-fade .15s ease;
+}
+.gb-modal {
+  width: 460px;
+  max-width: 92vw;
+  background: var(--gb-paper);
+  border: var(--gb-stroke);
+  border-radius: var(--gb-radius-lg);
+  box-shadow: var(--gb-shadow-lg);
+  padding: 26px 28px;
+  animation: gb-pop .2s cubic-bezier(.3,1.4,.5,1);
+}
+@keyframes gb-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gb-pop { from { transform: scale(.96) translateY(8px); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* utility */
+.gb-row { display: flex; align-items: center; gap: 10px; }
+.gb-col { display: flex; flex-direction: column; gap: 10px; }
+.gb-spacer { flex: 1; }

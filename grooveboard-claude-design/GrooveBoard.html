@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>GrooveBoard — Collaborative whiteboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="home.jsx"></script>
+<script type="text/babel" src="boards-drawer.jsx"></script>
+<script type="text/babel" src="whiteboard-parts.jsx"></script>
+<script type="text/babel" src="whiteboard.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "sunny",
+  "toolbarPosition": "left",
+  "background": "blank",
+  "iconStyle": "line",
+  "showCursors": false,
+  "pageSize": "letter"
+}/*EDITMODE-END*/;
+
+const CURRENT_USER = { name: "Sam Lee", initials: "SL" };
+
+const FRESH_BOARD = { id: "new", title: "Untitled board", emoji: "✨", color: "var(--gb-mango)" };
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  // Default surface is the blank board. Home gallery is reachable via Tweaks for inspection.
+  const [view, setView] = React.useState("board"); // 'home' | 'board'
+  const [activeBoard, setActiveBoard] = React.useState(FRESH_BOARD);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+  // Apply theme via data attribute
+  React.useEffect(() => {
+    document.documentElement.setAttribute("data-theme", t.theme);
+  }, [t.theme]);
+
+  const openBoard = (id) => {
+    if (id === "new") {
+      setActiveBoard({ ...FRESH_BOARD });
+    } else {
+      const b = (window.SAMPLE_BOARDS || []).find(x => x.id === id);
+      if (b) setActiveBoard(b);
+    }
+    setView("board");
+  };
+
+  return (
+    <div data-screen-label={view === "home" ? "01 Home (legacy)" : "01 Whiteboard"} style={{position: "absolute", inset: 0}}>
+      {view === "home" && (
+        <HomeScreen onOpen={openBoard} t={t} currentUser={CURRENT_USER}/>
+      )}
+      {view === "board" && (
+        <React.Fragment>
+          <Whiteboard
+            board={activeBoard}
+            onHome={() => setDrawerOpen(true)}
+            t={t}
+            currentUser={CURRENT_USER}
+          />
+          <BoardsDrawer
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            onOpen={openBoard}
+            currentBoardId={activeBoard?.id}
+            currentUser={CURRENT_USER}
+          />
+        </React.Fragment>
+      )}
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Theme"/>
+        <TweakRadio label="Color theme" value={t.theme}
+          options={["sunny","ocean","grape","mint"]}
+          onChange={(v) => setTweak("theme", v)}/>
+
+        <TweakSection label="Whiteboard"/>
+        <TweakRadio label="Page size" value={t.pageSize}
+          options={["letter","a4","square"]}
+          onChange={(v) => setTweak("pageSize", v)}/>
+        <TweakSelect label="Background" value={t.background}
+          options={["dots","grid","lines","blank"]}
+          onChange={(v) => setTweak("background", v)}/>
+        <TweakRadio label="Toolbar" value={t.toolbarPosition}
+          options={["top","bottom","left","right"]}
+          onChange={(v) => setTweak("toolbarPosition", v)}/>
+        <TweakRadio label="Icons" value={t.iconStyle}
+          options={["chunky","line"]}
+          onChange={(v) => setTweak("iconStyle", v)}/>
+        <TweakToggle label="Live collaborator cursors" value={t.showCursors}
+          onChange={(v) => setTweak("showCursors", v)}/>
+
+        <TweakSection label="Navigation"/>
+        <TweakButton label="Open boards drawer"
+          onClick={() => { setView("board"); setDrawerOpen(true); }}/>
+        <TweakButton label={view === "home" ? "Back to canvas" : "View legacy home gallery"}
+          onClick={() => setView(view === "home" ? "board" : "home")}/>
+      </TweaksPanel>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App/>);
+</script>
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>GrooveBoard — Visual Direction Explorations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Bricolage+Grotesque:wght@500;600;700&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  /* Direction overrides — each artboard rewrites its theme via [data-dir] */
+  [data-dir="playful"] { /* default — sunny chunky */ }
+
+  [data-dir="pro"] {
+    --gb-bg: #F4F4F2;
+    --gb-bg-deep: #E8E8E5;
+    --gb-paper: #FFFFFF;
+    --gb-ink: #1A1A1A;
+    --gb-ink-soft: #6B6B6B;
+    --gb-line: #E5E5E2;
+    --gb-stroke: 1px solid #1A1A1A;
+    --gb-shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+    --gb-shadow-md: 0 4px 12px rgba(0,0,0,.08);
+    --gb-shadow-lg: 0 8px 24px rgba(0,0,0,.1);
+    --gb-radius: 6px;
+    --gb-radius-lg: 10px;
+    --gb-font-display: "DM Sans", system-ui, sans-serif;
+    --gb-font-body: "DM Sans", system-ui, sans-serif;
+    --gb-tomato: #FF5A3C;
+    --gb-mango: #FFB938;
+  }
+
+  [data-dir="groove"] {
+    --gb-bg: #1F1B2E;
+    --gb-bg-deep: #2A2440;
+    --gb-paper: #FFF4E0;
+    --gb-ink: #1F1B2E;
+    --gb-ink-soft: #5C5670;
+    --gb-line: #3D3654;
+    --gb-stroke: 2.5px solid #1F1B2E;
+    --gb-shadow-sm: 0 2px 0 #FF6B9D;
+    --gb-shadow-md: 0 4px 0 #FF6B9D;
+    --gb-shadow-lg: 0 6px 0 #FF6B9D;
+    --gb-tomato: #FF6B9D;
+    --gb-mango: #FFD93D;
+    --gb-mint: #6BFFB8;
+    --gb-sky: #4ECDC4;
+    --gb-grape: #C77DFF;
+    --gb-lemon: #FFEE6B;
+    --gb-font-display: "Bricolage Grotesque", sans-serif;
+    --gb-font-body: "DM Sans", sans-serif;
+  }
+
+  [data-dir="pastel"] {
+    --gb-bg: #FFF1F0;
+    --gb-bg-deep: #FFE4E1;
+    --gb-paper: #FFFFFF;
+    --gb-ink: #4A3D5C;
+    --gb-ink-soft: #8C7E9E;
+    --gb-line: #F0E0DD;
+    --gb-stroke: 2px solid #4A3D5C;
+    --gb-shadow-sm: 0 2px 0 rgba(74,61,92,0.5);
+    --gb-shadow-md: 0 4px 0 rgba(74,61,92,0.5);
+    --gb-tomato: #FFA8A8;
+    --gb-mango: #FFD6A5;
+    --gb-lemon: #FDFFB6;
+    --gb-mint: #BDE0CE;
+    --gb-sky: #B8D8E8;
+    --gb-grape: #D4B8E8;
+    --gb-bubblegum: #FFC1CC;
+    --gb-font-display: "Caveat", "Fraunces", cursive;
+    --gb-font-body: "Quicksand", "Nunito", sans-serif;
+  }
+
+  /* Sample mini-mocks */
+  .mock {
+    width: 100%; height: 100%;
+    background: var(--gb-bg);
+    color: var(--gb-ink);
+    font-family: var(--gb-font-body);
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  .mock-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: var(--gb-stroke);
+    background: var(--gb-paper);
+  }
+  .mock-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--gb-font-display);
+    font-size: 22px; font-weight: 700;
+  }
+  .mock-logo-mark {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--gb-tomato);
+    border: var(--gb-stroke);
+    box-shadow: var(--gb-shadow-sm);
+  }
+  .mock-body {
+    padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .mock-h1 {
+    font-family: var(--gb-font-display);
+    font-size: 36px; font-weight: 600;
+    line-height: 1.05; margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .mock-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  }
+  .mock-card {
+    background: var(--gb-paper);
+    border: var(--gb-stroke);
+    border-radius: var(--gb-radius-lg);
+    box-shadow: var(--gb-shadow-md);
+    height: 130px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .mock-card-prev {
+    flex: 1;
+    background: var(--gb-bg);
+    border-bottom: var(--gb-stroke);
+    position: relative;
+  }
+  .mock-card-prev::after {
+    content: ""; position: absolute;
+    inset: 14px;
+    background: var(--gb-line);
+    border-radius: 4px;
+  }
+  .mock-card-meta {
+    padding: 10px 12px;
+    font-family: var(--gb-font-display);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .mock-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--gb-mango);
+    border: var(--gb-stroke);
+    font-size: 11px; font-weight: 700;
+  }
+  .mock-btn {
+    border: var(--gb-stroke);
+    background: var(--gb-tomato);
+    color: var(--gb-paper);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-weight: 700; font-size: 13px;
+    box-shadow: var(--gb-shadow-sm);
+  }
+
+  /* Toolbar mocks */
+  .tb-mock {
+    width: 100%; height: 100%;
+    background: var(--gb-bg);
+    position: relative;
+    overflow: hidden;
+    background-image: radial-gradient(var(--gb-line) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+    border-radius: 8px;
+  }
+  .tb-mock .tb {
+    position: absolute;
+    background: var(--gb-paper);
+    border: var(--gb-stroke);
+    border-radius: 999px;
+    box-shadow: var(--gb-shadow-md);
+    padding: 6px;
+    display: flex; gap: 4px;
+    align-items: center;
+  }
+  .tb-mock .tb-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 0; background: transparent;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tb-mock .tb-btn.on { background: var(--gb-ink); color: var(--gb-paper); }
+  .tb-mock .tb-vert { flex-direction: column; }
+  .tb-mock .tb-divider { width: 1px; height: 22px; background: var(--gb-line); margin: 0 4px; }
+  .tb-mock .tb-divider-v { width: 22px; height: 1px; background: var(--gb-line); margin: 4px 0; }
+  .tb-mock .tb-color { width: 30px; height: 30px; border-radius: 50%; background: var(--gb-tomato); border: var(--gb-stroke); }
+
+  .tb-mock .canvas-stuff {
+    position: absolute; top: 30%; left: 20%;
+    font-family: var(--gb-font-display);
+    font-weight: 600; font-size: 22px;
+    color: var(--gb-ink); opacity: 0.5;
+  }
+
+  /* Color swatch displays */
+  .swatch-row {
+    display: flex; gap: 12px;
+    align-items: center;
+    height: 100%;
+    justify-content: center;
+    padding: 24px;
+  }
+  .swatch {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    border: 2.5px solid var(--gb-ink, #2A2118);
+    box-shadow: 0 3px 0 var(--gb-ink, #2A2118);
+  }
+  .swatch-label {
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 8px;
+    color: var(--gb-ink-soft, #6B5E4E);
+  }
+  .swatch-col { display: flex; flex-direction: column; align-items: center; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+
+<script type="text/babel">
+function StyleMock({ dir, title, badge }) {
+  return (
+    <div className="mock" data-dir={dir}>
+      <div className="mock-topbar">
+        <div className="mock-logo">
+          <div className="mock-logo-mark"/>
+          <span>GrooveBoard</span>
+        </div>
+        <div style={{display: "flex", alignItems: "center", gap: 10}}>
+          <span className="mock-pill">
+            <span style={{width: 6, height: 6, borderRadius: "50%", background: "var(--gb-tomato)"}}/>
+            {badge}
+          </span>
+          <button className="mock-btn">+ New</button>
+        </div>
+      </div>
+      <div className="mock-body">
+        <h1 className="mock-h1">Hey, Sam.<br/><span style={{color: "var(--gb-ink-soft)"}}>{title}</span></h1>
+        <div className="mock-cards">
+          {[0,1,2].map(i => (
+            <div key={i} className="mock-card">
+              <div className="mock-card-prev" style={{background: ["var(--gb-mint)","var(--gb-mango)","var(--gb-bubblegum,var(--gb-grape))"][i], opacity: 0.5}}/>
+              <div className="mock-card-meta">Math Group {i+1}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ToolbarMock({ position }) {
+  const isVert = position === "left" || position === "right";
+  const tools = ["select","pen","highlighter","eraser","sticky","text","shape","laser"];
+  const pos = {
+    bottom: { bottom: 28, left: "50%", transform: "translateX(-50%)" },
+    top:    { top: 24, left: "50%", transform: "translateX(-50%)" },
+    left:   { left: 24, top: "50%", transform: "translateY(-50%)" },
+    right:  { right: 24, top: "50%", transform: "translateY(-50%)" },
+    floating: { bottom: 28, right: 28 },
+  }[position];
+
+  return (
+    <div className="tb-mock">
+      <div className="canvas-stuff">your canvas</div>
+      <div className={"tb" + (isVert ? " tb-vert" : "")} style={pos}>
+        {tools.map((t,i) => (
+          <React.Fragment key={t}>
+            <button className={"tb-btn" + (i === 1 ? " on" : "")}>
+              <Icon name={t} size={20}/>
+            </button>
+          </React.Fragment>
+        ))}
+        <div className={isVert ? "tb-divider-v" : "tb-divider"}/>
+        <div className="tb-color"/>
+      </div>
+    </div>
+  );
+}
+
+// Inline icon (subset, since icons.jsx not loaded here)
+function Icon({ name, size = 22 }) {
+  const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" };
+  const map = {
+    select: <svg {...props}><path d="M5 3l4 16 3-7 7-3z"/></svg>,
+    pen: <svg {...props}><path d="M4 20l3-1 11-11-2-2L5 17l-1 3z"/><path d="M14 6l4 4"/></svg>,
+    highlighter: <svg {...props}><path d="M5 19h6l3-3-6-6-3 3v6z"/><path d="M14 10l5-5-3-3-5 5"/></svg>,
+    eraser: <svg {...props}><path d="M14 3l7 7-9 9H5l-2-2 11-11z"/></svg>,
+    sticky: <svg {...props}><path d="M4 4h12l4 4v12H4z"/></svg>,
+    text: <svg {...props}><path d="M5 5h14M12 5v14M9 19h6"/></svg>,
+    shape: <svg {...props}><rect x="3" y="3" width="11" height="11" rx="1.5"/><circle cx="16" cy="16" r="5"/></svg>,
+    laser: <svg {...props}><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg>,
+  };
+  return map[name] || <svg {...props}><circle cx="12" cy="12" r="6"/></svg>;
+}
+
+function PaletteCard({ vars, name, swatches }) {
+  return (
+    <div style={{
+      background: vars["--gb-bg"], color: vars["--gb-ink"],
+      width: "100%", height: "100%", padding: 28,
+      display: "flex", flexDirection: "column", justifyContent: "center", gap: 16,
+      borderRadius: 8,
+      ...vars,
+    }}>
+      <div style={{display: "flex", justifyContent: "space-between", alignItems: "baseline"}}>
+        <div style={{fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 600}}>{name}</div>
+        <div style={{fontFamily: "JetBrains Mono, monospace", fontSize: 11, opacity: 0.6}}>// palette</div>
+      </div>
+      <div style={{display: "grid", gridTemplateColumns: `repeat(${swatches.length}, 1fr)`, gap: 14}}>
+        {swatches.map((s,i) => (
+          <div key={i} className="swatch-col">
+            <div className="swatch" style={{background: s.value}}/>
+            <div className="swatch-label">{s.name}<br/>{s.value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="overall" title="Overall visual style">
+        <DCArtboard id="d1" label="Playful (selected) — chunky, warm, kid-friendly" width={720} height={500}>
+          <StyleMock dir="playful" title="Let's make something great today." badge="3 new"/>
+        </DCArtboard>
+        <DCArtboard id="d2" label="Pro — clean, rounded, classroom-management vibe" width={720} height={500}>
+          <StyleMock dir="pro" title="Let's make something great today." badge="3 new"/>
+        </DCArtboard>
+        <DCArtboard id="d3" label="Groove — true to the name, dark + neon disco" width={720} height={500}>
+          <StyleMock dir="groove" title="Let's make something great today." badge="3 new"/>
+        </DCArtboard>
+        <DCArtboard id="d4" label="Pastel — soft, sketchbook, gentle" width={720} height={500}>
+          <StyleMock dir="pastel" title="Let's make something great today." badge="3 new"/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="palettes" title="Color palettes">
+        <DCArtboard id="p1" label="Sunny (default)" width={560} height={300}>
+          <PaletteCard
+            name="Sunny"
+            vars={{
+              "--gb-bg": "#FFF6E8",
+              "--gb-ink": "#2A2118",
+            }}
+            swatches={[
+              {name: "Tomato", value: "#F25B3A"},
+              {name: "Mango", value: "#FFB23F"},
+              {name: "Lemon", value: "#F8E16C"},
+              {name: "Mint", value: "#5DD0A8"},
+              {name: "Sky", value: "#4FB3E8"},
+              {name: "Grape", value: "#8B6CD9"},
+            ]}
+          />
+        </DCArtboard>
+        <DCArtboard id="p2" label="Ocean" width={560} height={300}>
+          <PaletteCard
+            name="Ocean"
+            vars={{ "--gb-bg": "#E8F4FA", "--gb-ink": "#1B3A4A" }}
+            swatches={[
+              {name: "Coral", value: "#FF8C66"},
+              {name: "Sand", value: "#FFD89E"},
+              {name: "Foam", value: "#A8E6E0"},
+              {name: "Wave", value: "#5BB8DC"},
+              {name: "Deep", value: "#2E6E92"},
+              {name: "Coral", value: "#E85D75"},
+            ]}
+          />
+        </DCArtboard>
+        <DCArtboard id="p3" label="Mint" width={560} height={300}>
+          <PaletteCard
+            name="Mint"
+            vars={{ "--gb-bg": "#E8F7EF", "--gb-ink": "#1F3A2A" }}
+            swatches={[
+              {name: "Leaf", value: "#52A87A"},
+              {name: "Lime", value: "#C5E865"},
+              {name: "Honey", value: "#F5C03F"},
+              {name: "Berry", value: "#D85A8C"},
+              {name: "Plum", value: "#8B5FB5"},
+              {name: "Sage", value: "#9DC9A8"},
+            ]}
+          />
+        </DCArtboard>
+        <DCArtboard id="p4" label="Grape" width={560} height={300}>
+          <PaletteCard
+            name="Grape"
+            vars={{ "--gb-bg": "#F1ECFA", "--gb-ink": "#2D1B4A" }}
+            swatches={[
+              {name: "Iris", value: "#7B5DD9"},
+              {name: "Bubble", value: "#F08AB8"},
+              {name: "Cream", value: "#FFE9B8"},
+              {name: "Sage", value: "#8FC8A8"},
+              {name: "Sky", value: "#7AB8E8"},
+              {name: "Sun", value: "#FFB23F"},
+            ]}
+          />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="toolbar" title="Toolbar placement">
+        <DCArtboard id="t1" label="Bottom (default) — easy to reach, traditional" width={560} height={400}>
+          <ToolbarMock position="bottom"/>
+        </DCArtboard>
+        <DCArtboard id="t2" label="Left — out of the way, more vertical canvas" width={560} height={400}>
+          <ToolbarMock position="left"/>
+        </DCArtboard>
+        <DCArtboard id="t3" label="Right — better for righties, stays clear of nav" width={560} height={400}>
+          <ToolbarMock position="right"/>
+        </DCArtboard>
+        <DCArtboard id="t4" label="Top — under page nav, frees canvas bottom" width={560} height={400}>
+          <ToolbarMock position="top"/>
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
