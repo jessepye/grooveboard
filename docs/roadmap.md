@@ -10,9 +10,13 @@
 
 ### Frontend (ultra-simple)
 
-- Non-zoomable canvas with multiple pages.
+- canvas with multiple pages.
+- Only zoomable to a few simple preset values: fit to page, 100%, 200%
 - Pen tool: freehand lines (default color/thickness).
-- Eraser tool.
+- Eraser tool. (Stroke and pixel)
+- Text
+- Sticky Notes
+- Laser pointer (similar to pen but disappears after a few seconds)
 - Clear board.
 - Web client connects to the WebSocket service and renders incoming drawings.
 - Stack: React + TypeScript.

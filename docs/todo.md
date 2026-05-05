@@ -36,6 +36,38 @@
 
 ---
 
+## Risks & Mitigations (before going live)
+
+### AWS bill surprises
+- [ ] Set AWS Budget alerts at $5 / $20 / $50 with email notifications
+- [ ] Set CloudWatch Logs retention to 7 days (default is "never expire")
+- [ ] Tag all resources (`project=grooveboard`) so cost explorer can attribute spend
+- [ ] Avoid NAT Gateway (~$32/mo idle) and idle ALBs in early phases — start with a single small EC2
+- [ ] Mentally commit a hard kill threshold (e.g. "if bill > $X, tear it all down")
+
+### Abuse of an open anonymous real-time service
+- [ ] Rate-limit per WebSocket connection (messages/sec and bytes/sec)
+- [ ] Cap stroke payload size and points-per-stroke server-side
+- [ ] Cap concurrent connections per IP
+- [ ] Use unguessable board IDs (UUIDs, not sequential)
+- [ ] Don't expose a public list of boards
+- [ ] Add a feature flag / env var kill switch to disable new connections fast
+- [ ] Keep boards ephemeral in Phase 1 — no persistence shrinks abuse and legal surface
+
+### Credential leaks
+- [ ] Never commit `.env`; add to `.gitignore` from day one
+- [ ] Prefer IAM roles on EC2/ECS over long-lived access keys
+- [ ] Confirm GitHub secret scanning is on for the repo
+
+### DDoS / network exposure
+- [ ] Front static assets with CloudFront (or use Vercel/Netlify) for free Shield Standard
+- [ ] Put the WebSocket service behind an ALB or CloudFront
+
+### Hosting split to shrink AWS surface
+- [ ] Consider deploying the frontend on Vercel/Netlify (free tier) and only the WebSocket service on AWS
+
+---
+
 ## Someday / Maybe
 
 ### Persistence & boards
