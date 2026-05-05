@@ -1,4 +1,4 @@
-**Project Goal:** Create a simple, collaborative whiteboard focused on core functionality. It's a portfolio project to showcase software engineering skills, particularly in backend architecture.
+**Project Goal:** Create a simple, collaborative whiteboard focused on core functionality, with a scalable and fault-tolerant backend.
 
 **Core User Experience:**
 

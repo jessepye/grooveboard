@@ -4,133 +4,113 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-GrooveBoard is a simple, real-time collaborative whiteboard application designed for ease of use (even for younger users). The project is built with a React TypeScript frontend and follows Test-Driven Development (TDD) principles. This is currently in Phase 1 of development, focusing on core drawing and real-time anonymous collaboration.
+GrooveBoard is a planned simple, real-time collaborative whiteboard application designed for ease of use (even for younger users). It is currently in **early Phase 1**: the visual UI exists as a prototype, but no real build pipeline, no backend, and no tests have been wired up yet. The full vision is a React/TypeScript frontend with a microservice backend on AWS — see `docs/roadmap.md`.
 
-## Architecture
+## Current Repo State
 
-The application follows a client-server architecture:
+The repo contains:
 
-- **Frontend**: React 19 with TypeScript, using Create React App
-- **Real-time Communication**: Socket.IO for WebSocket-based collaborative features
-- **Backend**: Currently expects a WebSocket server running on `localhost:3001`
-- **Future Architecture**: Planned microservices architecture with AWS/Kubernetes deployment
+- `grooveboard-claude-design/` — a **runnable design prototype** of the UI. Open `GrooveBoard.html` directly in a browser; no build step. It uses React 18 (UMD bundles from a CDN) plus `@babel/standalone` to compile JSX in the browser at page load. This is suitable for design iteration but **not** for production.
+- `docs/` — roadmap, todos, llm-guidelines.
+- No `frontend/` directory yet. A previous Create-React-App scaffold existed and was deleted in commit `9c38d03` when the design prototype was added.
+- No backend code yet.
 
-### Key Components
+### Prototype files (`grooveboard-claude-design/`)
 
-- `App.tsx` - Main application state management, WebSocket connection, and multi-page support
-- `Board.tsx` - Board wrapper component
-- `CanvasPage.tsx` - Canvas rendering and drawing interaction logic
-- `Toolbar.tsx` - Tool selection and drawing controls
-- `Tool.tsx` - Tool type definitions
+- `GrooveBoard.html` — entry point; loads React, Babel, and the JSX files
+- `GrooveBoard - Variants.html` — gallery rendering multiple states side-by-side
+- `styles.css` — design tokens via CSS custom properties (`--gb-paper`, `--gb-ink`, etc.)
+- `whiteboard.jsx` — main editor screen (state lives here: tool, color, paths, stickies, page, history)
+- `whiteboard-parts.jsx` — `DrawCanvas`, `Sticky`, `LiveCursor`, `Toolbar`
+- `home.jsx` — board picker / home screen
+- `boards-drawer.jsx` — side drawer for saved boards
+- `tweaks-panel.jsx` — live design-tweaks UI (theme, toolbar position, page size, etc.)
+- `icons.jsx` — inline SVG icons
+- `design-canvas.jsx` — scaffolding used **only** by `GrooveBoard - Variants.html`; not part of the runtime app
 
-### Data Model
+### Prototype caveats
 
-The core data structure is the `Stroke` interface:
-```typescript
-interface Stroke {
-  id: string;
-  tool: Tool | 'pen';
-  points: { x: number; y: number }[];
-  color: string;
-  width: number;
+- No imports/exports — files share state by attaching to `window.X` globals.
+- No TypeScript — plain JSX.
+- No tests — this is a design artifact.
+- "Collaborators" are fake cursors animated by `setInterval`. No WebSocket connection.
+- State is local React state; nothing persists.
+
+## Data Model (in the prototype)
+
+A page's strokes live in `paths[pageIndex]`, an array of:
+
+```js
+{
+  id: string,
+  tool: 'pen' | 'highlighter' | 'shape',
+  points: { x: number, y: number }[],   // page-logical coords, not screen coords
+  color: string,
+  size: number,
 }
 ```
 
-The application supports multiple pages, where each page contains an array of strokes.
+Stickies are stored separately: `stickies[pageIndex]` is an array of `{ id, x, y, color, rot, text }`.
+
+Coordinates are **logical page coordinates** (page is 1100×850 logical px for letter); the page DOM is `transform: scale(activeScale)` to fit the viewport. Click handlers divide by `activeScale` to recover logical coords.
 
 ## Development Commands
 
-All commands should be run from the `frontend/` directory:
+There are no build commands yet. To view the prototype:
 
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-
-# Run tests
-npm test
-
-# Build for production
-npm run build
-
-# Type checking (via react-scripts)
-npx tsc --noEmit
+# From the repo root
+open grooveboard-claude-design/GrooveBoard.html
+# or with a local server (avoids any future CORS issues):
+cd grooveboard-claude-design && python3 -m http.server 8000
 ```
+
+Once a real `frontend/` is created (likely Vite + TS — see roadmap), this section should be updated with `npm install`, `npm run dev`, etc.
 
 ## Development Guidelines
 
 ### Test-Driven Development
-All development should follow TDD principles - write tests before implementation code. The project uses Jest and React Testing Library.
+When real (non-prototype) code is added, follow TDD: write tests before implementation. Per `docs/llm-guidelines.md`, this is a hard project rule.
 
-### Code Style
-- TypeScript with strict mode enabled
+### Code Style (for the real frontend, when built)
+- TypeScript with strict mode
 - React functional components with hooks
 - Props interfaces for all components
-- Consistent naming conventions (camelCase for variables/functions, PascalCase for components)
+- camelCase for variables/functions, PascalCase for components
 
-### Key Development Patterns
+### Patterns visible in the prototype (worth preserving in the rewrite)
 
-1. **State Management**: Uses React hooks with centralized state in App component
-2. **Real-time Updates**: WebSocket events are handled with optimistic updates (update local state immediately, then broadcast)
-3. **Multi-page Support**: Pages are managed as an array of stroke arrays with currentPageIndex
-4. **Tool System**: Extensible tool system with pen and eraser tools
+1. **Lifted state** — editor state centralized in `Whiteboard`; children are dumb.
+2. **Logical vs screen coordinates** — strokes stored in scale-independent page space.
+3. **Snapshot-based undo/redo** — `history` array of `{paths, stickies}` + `histIdx` pointer.
+4. **`useLayoutEffect` for layout reads** — fit-zoom is computed sync, before paint, to avoid one-frame flashes.
+5. **CSS-variable theming** — `data-theme="x"` on `<html>` swaps the whole palette.
 
-### WebSocket Events
-- `draw` - Broadcast new stroke data
-- `erase` - Broadcast updated paths after erasure
-- `clear` - Clear current page
+## Roadmap (see `docs/roadmap.md` for details)
 
-## Current Development Focus
+- **Phase 1 (current):** real-time anonymous drawing. WebSocket service, containerized, on AWS.
+- **Phase 2:** EKS, persistence service, ads.
+- **Phase 3:** user auth, paid ad-free tier.
+- **Phase 4:** observability, performance, security hardening.
 
-The project is in Phase 1: Core Drawing & Real-time Anonymous Collaboration Foundation. Key features implemented:
-- Basic pen tool with configurable color/width
-- Eraser tool with configurable width
-- Clear board functionality
-- Multi-page support
-- Real-time collaboration via WebSocket
+### Planned WebSocket events (Phase 1)
+- `draw` — broadcast new stroke
+- `erase` — broadcast updated paths after erasure
+- `clear` — clear current page
 
-## Future Phases
+## Observability Stack (planned, Phase 4)
 
-- Phase 2: Kubernetes deployment, board persistence, ad integration
-- Phase 3: User authentication, premium features
-- Phase 4: Monitoring, optimization, advanced cloud features
+Industry-standard stack to be integrated:
 
-## Observability Stack Integration
+- **Prometheus + M3DB** — metrics collection and long-term storage (drawing operations, sessions, WebSocket connections).
+- **OpenTelemetry** — distributed tracing across frontend and future services.
+- **OpenSearch** — centralized structured logging (migration target from Elastic + Splunk).
+- **ClickHouse** — analytics datastore for usage and behavior queries.
 
-GrooveBoard will integrate with Visa's observability infrastructure using industry-standard tools:
-
-### Metrics Collection (Prometheus + M3DB)
-- **Prometheus**: Collect application metrics (drawing operations, user sessions, WebSocket connections)
-- **M3DB**: Long-term scalable storage for Prometheus metrics
-- Monitor canvas performance, stroke counts, page switches, and collaboration patterns
-
-### Distributed Tracing (OpenTelemetry)
-- **OpenTelemetry SDK**: Instrument React frontend and future backend services
-- **OTel Collector**: Aggregate and export telemetry data
-- Trace user interactions: input → WebSocket → canvas updates → collaboration events
-
-### Logging (OpenSearch Migration)
-- **Current**: Elastic + Splunk
-- **Target**: OpenSearch for centralized log aggregation
-- Structured logging for user actions, errors, WebSocket events, and system diagnostics
-
-### Analytics Datastore (ClickHouse)
-- Store user behavior analytics and drawing patterns
-- Fast queries for real-time dashboards and collaboration insights
-- Track usage metrics for product optimization
-
-### Implementation Plan
-1. Add OpenTelemetry SDK to React frontend
+Implementation order, when we get to it:
+1. OpenTelemetry SDK in the frontend
 2. Instrument drawing pipeline and WebSocket events
-3. Replace console.log with structured logging
-4. Set up Prometheus metrics collection
-5. Configure OTel Collector for data aggregation
-6. Design ClickHouse schema for behavioral analytics
-
-This observability stack will provide comprehensive monitoring across the entire collaborative whiteboard experience.
-
-## Testing
-
-Run tests with `npm test` in the frontend directory. Follow TDD practices by writing tests first for all new features.
+3. Replace `console.log` with structured logging
+4. Prometheus metrics collection
+5. OTel Collector for aggregation
+6. ClickHouse schema design
