@@ -55,9 +55,9 @@
 - [ ] Keep boards ephemeral in Phase 1 — no persistence shrinks abuse and legal surface
 
 ### Credential leaks
-- [ ] Never commit `.env`; add to `.gitignore` from day one
+- [x] Never commit `.env`; add to `.gitignore` from day one
 - [ ] Prefer IAM roles on EC2/ECS over long-lived access keys
-- [ ] Confirm GitHub secret scanning is on for the repo
+- [x] Confirm GitHub secret scanning is on for the repo
 
 ### DDoS / network exposure
 - [ ] Front static assets with CloudFront (or use Vercel/Netlify) for free Shield Standard
