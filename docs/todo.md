@@ -15,10 +15,11 @@
 ## Next
 
 ### Frontend foundation
-- [ ] Decide build tooling: Vite + TypeScript (CRA is deprecated)
-- [ ] Scaffold a real `frontend/` directory
+- [x] Decide build tooling: Vite + TypeScript (CRA is deprecated)
+- [x] Scaffold a real `frontend/` directory (Vite 5 + React 18 + TS)
+- [x] Set up Vitest + React Testing Library (switched from Jest — native Vite integration)
 - [ ] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components
-- [ ] Set up Jest + React Testing Library; write tests for pen/eraser/clear before porting drawing logic
+- [ ] Write tests for pen/eraser/clear before porting drawing logic (TDD)
 - [ ] Replace `window.X` globals with proper ES module imports
 
 ### Backend (Collaboration Service)
