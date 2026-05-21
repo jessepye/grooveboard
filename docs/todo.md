@@ -23,11 +23,12 @@
 - [ ] Replace `window.X` globals with proper ES module imports
 
 ### Backend (Collaboration Service)
-- [ ] Pick stack (Node + Socket.IO is the path of least resistance, matches the frontend)
-- [ ] Implement WebSocket server: connect, broadcast `draw`/`erase`/`clear` to peers on the same board
-- [ ] Decide data serialization (JSON for now; revisit if perf becomes an issue)
+- [x] Pick stack (Node + Socket.IO is the path of least resistance, matches the frontend)
+- [x] Implement WebSocket server: connect, broadcast `draw`/`erase`/`clear` to peers on the same board (`collab-service/`, TDD, 6 integration tests)
+- [x] Decide data serialization (JSON for now; revisit if perf becomes an issue) — Socket.IO's default JSON encoding; relay treats payloads as opaque
 - [ ] Dockerfile for the service
 - [ ] Run frontend + backend together locally; two browser tabs drawing on each other's boards
+- [ ] Apply abuse mitigations (rate limits, payload caps, connection caps) — see Risks below
 
 ### Deployment
 - [ ] Pick hosting (single EC2 vs. ECS Fargate — start with whichever is simpler)
