@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import App from './App'
 
 describe('App', () => {
-  it('renders the Vite + React heading', () => {
-    render(<App />)
-    expect(screen.getByRole('heading', { name: /vite \+ react/i })).toBeInTheDocument()
+  it('renders the whiteboard drawing surface', () => {
+    const { container } = render(<App />)
+    expect(container.querySelector('canvas')).toBeInTheDocument()
   })
 })
