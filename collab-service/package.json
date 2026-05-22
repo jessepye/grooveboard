@@ -5,7 +5,7 @@
   "description": "GrooveBoard real-time collaboration WebSocket service",
   "type": "module",
   "engines": {
-    "node": ">=18"
+    "node": ">=26"
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -16,13 +16,13 @@
     "test:run": "vitest --run"
   },
   "dependencies": {
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
-    "@types/node": "^20.14.0",
-    "socket.io-client": "^4.7.5",
-    "tsx": "^4.16.0",
-    "typescript": "~5.6.2",
-    "vitest": "^2.1.9"
+    "@types/node": "^25.9.1",
+    "socket.io-client": "^4.8.3",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
   }
 }
