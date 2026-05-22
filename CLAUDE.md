@@ -12,7 +12,7 @@ The repo contains:
 
 - `grooveboard-claude-design/` — a **runnable design prototype** of the UI. Open `GrooveBoard.html` directly in a browser; no build step. It uses React 18 (UMD bundles from a CDN) plus `@babel/standalone` to compile JSX in the browser at page load. This is suitable for design iteration but **not** for production.
 - `docs/` — roadmap, todos, llm-guidelines.
-- `frontend/` — Vite 5 + React 18 + TypeScript scaffold. Tests via Vitest + React Testing Library (jsdom). Pinned to Vite/Vitest versions compatible with Node 18. No prototype code has been ported in yet.
+- `frontend/` — Vite + React 19 + TypeScript. Tests via Vitest + React Testing Library (jsdom). Targets Node 26, declared via the root `.nvmrc` and per-package `engines` + `engine-strict` (`.npmrc`); toolchain tracks current stable (Vite 8 / Vitest 4 / TypeScript 6). The prototype's `Whiteboard`/`DrawCanvas`/`Toolbar` are ported into `src/drawing/` (pen/highlighter/eraser path).
 - No backend code yet.
 
 ### Prototype files (`grooveboard-claude-design/`)
