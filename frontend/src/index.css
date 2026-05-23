@@ -1,0 +1,65 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GrooveBoard — design tokens + base styles
+   Ported from grooveboard-claude-design/styles.css.
+   Vibe: warm, refined, calm. A grown-up sketch tool with personality.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Palette — Warm default (paper-like, soft cream) */
+  --gb-bg: #f5f2ec;
+  --gb-bg-deep: #eae5da;
+  --gb-paper: #fbfaf6;
+  --gb-ink: #1f1d1a;
+  --gb-ink-soft: #6e695e;
+  --gb-line: #e0dacb;
+  --gb-accent: #c75a3c;
+
+  /* Brand swatches */
+  --gb-tomato: #c75a3c;
+  --gb-mango: #e8a53d;
+  --gb-lemon: #e8d26e;
+  --gb-mint: #6fb397;
+  --gb-sky: #5a9dc2;
+  --gb-grape: #7b6bb0;
+  --gb-bubblegum: #c57ba0;
+
+  /* Strokes & shadows */
+  --gb-stroke: 1px solid var(--gb-line);
+  --gb-stroke-strong: 1.5px solid var(--gb-ink);
+  --gb-shadow-sm: 0 1px 2px rgba(31, 29, 26, 0.08);
+  --gb-shadow-md: 0 2px 8px rgba(31, 29, 26, 0.08), 0 1px 2px rgba(31, 29, 26, 0.06);
+  --gb-shadow-lg: 0 8px 24px rgba(31, 29, 26, 0.1), 0 2px 4px rgba(31, 29, 26, 0.06);
+  --gb-radius: 10px;
+  --gb-radius-lg: 14px;
+  --gb-radius-pill: 999px;
+
+  --gb-font-display: 'Fraunces', 'Recoleta', Georgia, serif;
+  --gb-font-body: 'Inter', 'Nunito', system-ui, sans-serif;
+  --gb-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--gb-font-body);
+  color: var(--gb-ink);
+  background: var(--gb-bg);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+#root {
+  position: absolute;
+  inset: 0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}

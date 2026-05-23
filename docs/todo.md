@@ -15,11 +15,12 @@
 ## Next
 
 ### Frontend foundation
-- [ ] Decide build tooling: Vite + TypeScript (CRA is deprecated)
-- [ ] Scaffold a real `frontend/` directory
-- [ ] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components
-- [ ] Set up Jest + React Testing Library; write tests for pen/eraser/clear before porting drawing logic
-- [ ] Replace `window.X` globals with proper ES module imports
+- [x] Decide build tooling: Vite + TypeScript (CRA is deprecated)
+- [x] Scaffold a real `frontend/` directory (Vite 5 + React 18 + TS)
+- [x] Set up Vitest + React Testing Library (switched from Jest — native Vite integration)
+- [x] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components (`frontend/src/drawing/`). Tool set scoped to pen/highlighter/eraser; select/sticky/text/shape/laser, stickies, live cursors, page nav still deferred
+- [x] Write tests for pen/eraser/clear before porting drawing logic (TDD)
+- [x] Replace `window.X` globals with proper ES module imports (ported `frontend/` code is all ES modules; remaining globals are in the prototype design artifact only)
 
 ### Backend (Collaboration Service)
 - [ ] Pick stack (Node + Socket.IO is the path of least resistance, matches the frontend)

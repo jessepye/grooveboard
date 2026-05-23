@@ -12,7 +12,7 @@ The repo contains:
 
 - `grooveboard-claude-design/` — a **runnable design prototype** of the UI. Open `GrooveBoard.html` directly in a browser; no build step. It uses React 18 (UMD bundles from a CDN) plus `@babel/standalone` to compile JSX in the browser at page load. This is suitable for design iteration but **not** for production.
 - `docs/` — roadmap, todos, llm-guidelines.
-- No `frontend/` directory yet. A previous Create-React-App scaffold existed and was deleted in commit `9c38d03` when the design prototype was added.
+- `frontend/` — Vite + React 19 + TypeScript. Tests via Vitest + React Testing Library (jsdom). Targets Node 26, declared via the root `.nvmrc` and per-package `engines` + `engine-strict` (`.npmrc`); toolchain tracks current stable (Vite 8 / Vitest 4 / TypeScript 6). The prototype's `Whiteboard`/`DrawCanvas`/`Toolbar` are ported into `src/drawing/` (pen/highlighter/eraser path).
 - No backend code yet.
 
 ### Prototype files (`grooveboard-claude-design/`)
@@ -56,16 +56,21 @@ Coordinates are **logical page coordinates** (page is 1100×850 logical px for l
 
 ## Development Commands
 
-There are no build commands yet. To view the prototype:
-
+Prototype (no build step):
 ```bash
-# From the repo root
 open grooveboard-claude-design/GrooveBoard.html
-# or with a local server (avoids any future CORS issues):
-cd grooveboard-claude-design && python3 -m http.server 8000
+# or: cd grooveboard-claude-design && python3 -m http.server 8000
 ```
 
-Once a real `frontend/` is created (likely Vite + TS — see roadmap), this section should be updated with `npm install`, `npm run dev`, etc.
+Frontend (Vite + TS):
+```bash
+cd frontend
+npm install
+npm run dev      # dev server
+npm test         # vitest (watch)
+npm test -- --run  # vitest single run
+npm run build    # tsc -b && vite build
+```
 
 ## Development Guidelines
 
