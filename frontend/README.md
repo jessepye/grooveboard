@@ -1,50 +1,57 @@
-# React + TypeScript + Vite
+# frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+GrooveBoard's web client — Vite 5 + React 18 + TypeScript. Milestone 1 is a
+real-time collaborative whiteboard: anonymous users on the same board id draw on
+each other's canvas through the [collaboration service](../collab-service).
 
-Currently, two official plugins are available:
+## Layout
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+src/
+  drawing/      pure, React-free model + logic (unit-tested in isolation)
+    types.ts      Point / Stroke / Tool / Paths
+    geometry.ts   distToSegment, eraseStrokesAt
+    stroke.ts     createStroke
+  collab/
+    useCollab.ts  Socket.IO client hook — sends/receives draw|erase|clear
+  components/
+    DrawCanvas.tsx  the drawing surface (pointer events -> strokes)
+    Toolbar.tsx     pen / eraser / color / size / clear
+    Whiteboard.tsx  lifted state; bridges canvas+toolbar to the relay
+  board/
+    boardId.ts    resolve/mint the board id from the URL (?board=<uuid>)
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+The prototype's `window.X` globals are gone — everything is ES modules. State is
+lifted into `Whiteboard` (the prototype's "dumb children" pattern), strokes are
+stored in logical page coordinates, and local edits are both applied and
+broadcast; remote events are applied without re-broadcasting.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+## Commands
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+npm install
+npm run dev          # dev server (http://localhost:5173)
+npm test             # vitest (watch)
+npm test -- --run    # vitest single run
+npm run build        # tsc -b && vite build
+npm run lint
 ```
+
+## Connecting to the relay
+
+The Socket.IO client points at `VITE_COLLAB_URL` (default
+`http://localhost:3001`). To run the full stack locally, start the
+[collab-service](../collab-service) on `:3001`, then open two browser tabs at the
+same `?board=<id>` URL.
+
+```bash
+# point at a deployed relay instead of localhost
+echo 'VITE_COLLAB_URL=https://collab.example.com' > .env.local
+```
+
+## Not yet ported (see `docs/todo.md`)
+
+Highlighter, sticky notes, multiple pages, zoom controls, themes, share modal,
+undo/redo, and live collaborator cursors. The relay only carries
+`draw`/`erase`/`clear`; cursor presence would be a new event.

@@ -1,35 +1,22 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useMemo } from 'react'
+import Whiteboard from './components/Whiteboard'
+import { resolveBoardId } from './board/boardId'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Resolve the board once. A freshly minted id is written back to the URL so
+  // it can be shared/refreshed.
+  const boardId = useMemo(() => {
+    const { boardId, created } = resolveBoardId(window.location.search)
+    if (created) {
+      const url = new URL(window.location.href)
+      url.searchParams.set('board', boardId)
+      window.history.replaceState(null, '', url)
+    }
+    return boardId
+  }, [])
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  return <Whiteboard boardId={boardId} />
 }
 
 export default App

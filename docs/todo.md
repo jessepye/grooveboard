@@ -18,9 +18,10 @@
 - [x] Decide build tooling: Vite + TypeScript (CRA is deprecated)
 - [x] Scaffold a real `frontend/` directory (Vite 5 + React 18 + TS)
 - [x] Set up Vitest + React Testing Library (switched from Jest — native Vite integration)
-- [ ] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components
-- [ ] Write tests for pen/eraser/clear before porting drawing logic (TDD)
-- [ ] Replace `window.X` globals with proper ES module imports
+- [x] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components (core pen/eraser/clear; stickies/pages/zoom/themes deferred)
+- [x] Write tests for pen/eraser/clear before porting drawing logic (TDD) — 36 tests, pure geometry/stroke helpers + component + hook tests
+- [x] Replace `window.X` globals with proper ES module imports
+- [x] Wire Socket.IO client to the relay (`useCollab`, broadcasts/receives `draw`/`erase`/`clear`; board id from `?board=` UUID)
 
 ### Backend (Collaboration Service)
 - [ ] Pick stack (Node + Socket.IO is the path of least resistance, matches the frontend)
