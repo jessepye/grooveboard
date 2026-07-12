@@ -24,11 +24,12 @@
 - [x] Wire Socket.IO client to the relay (`useCollab`, broadcasts/receives `draw`/`erase`/`clear`; board id from `?board=` UUID)
 
 ### Backend (Collaboration Service)
-- [ ] Pick stack (Node + Socket.IO is the path of least resistance, matches the frontend)
-- [ ] Implement WebSocket server: connect, broadcast `draw`/`erase`/`clear` to peers on the same board
-- [ ] Decide data serialization (JSON for now; revisit if perf becomes an issue)
-- [ ] Dockerfile for the service
+- [x] Pick stack (Node + Socket.IO is the path of least resistance, matches the frontend)
+- [x] Implement WebSocket server: connect, broadcast `draw`/`erase`/`clear` to peers on the same board (`collab-service/`, TDD — 29 tests)
+- [x] Decide data serialization (JSON for now; revisit if perf becomes an issue)
+- [x] Dockerfile for the service (multi-stage, non-root; image not yet built — Docker daemon wasn't running)
 - [ ] Run frontend + backend together locally; two browser tabs drawing on each other's boards
+  - relay verified live with scripted socket clients (relay/isolation/validation all pass); the visual two-tab check is the remaining step
 
 ### Deployment
 - [ ] Pick hosting (single EC2 vs. ECS Fargate — start with whichever is simpler)
@@ -48,13 +49,13 @@
 - [ ] Mentally commit a hard kill threshold (e.g. "if bill > $X, tear it all down")
 
 ### Abuse of an open anonymous real-time service
-- [ ] Rate-limit per WebSocket connection (messages/sec and bytes/sec)
-- [ ] Cap stroke payload size and points-per-stroke server-side
-- [ ] Cap concurrent connections per IP
-- [ ] Use unguessable board IDs (UUIDs, not sequential)
-- [ ] Don't expose a public list of boards
-- [ ] Add a feature flag / env var kill switch to disable new connections fast
-- [ ] Keep boards ephemeral in Phase 1 — no persistence shrinks abuse and legal surface
+- [x] Rate-limit per WebSocket connection (token bucket: 40 msg/s, burst 120; excess dropped)
+- [x] Cap stroke payload size and points-per-stroke server-side (512 KB/message, 4000 points/stroke, full shape validation)
+- [x] Cap concurrent connections per IP (20)
+- [x] Use unguessable board IDs (UUIDs, not sequential) — server rejects non-UUID board ids at handshake
+- [x] Don't expose a public list of boards (server holds no board list; rooms exist only while occupied)
+- [x] Add a feature flag / env var kill switch to disable new connections fast (`COLLAB_DISABLED=1`)
+- [x] Keep boards ephemeral in Phase 1 — no persistence shrinks abuse and legal surface (relay is stateless by design)
 
 ### Credential leaks
 - [x] Never commit `.env`; add to `.gitignore` from day one

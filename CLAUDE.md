@@ -13,7 +13,7 @@ The repo contains:
 - `grooveboard-claude-design/` — a **runnable design prototype** of the UI. Open `GrooveBoard.html` directly in a browser; no build step. It uses React 18 (UMD bundles from a CDN) plus `@babel/standalone` to compile JSX in the browser at page load. This is suitable for design iteration but **not** for production.
 - `docs/` — roadmap, todos, llm-guidelines.
 - `frontend/` — Vite 5 + React 18 + TypeScript. Tests via Vitest + React Testing Library (jsdom). The prototype's core drawing (pen/eraser/clear) has been ported into typed components (`src/components/`) with pure, tested logic in `src/drawing/` and the real-time relay client in `src/collab/`. Stickies, pages, zoom, themes, and live cursors are not yet ported (see `docs/todo.md`).
-- No backend code yet.
+- `collab-service/` — the Phase 1 backend: a stateless Node + Socket.IO relay (TypeScript, Vitest). One room per board (UUID required at handshake); validates then broadcasts `draw`/`erase`/`clear` to peers, sender excluded. Abuse limits built in: payload/point caps, per-connection token-bucket rate limiting, per-IP connection cap, `COLLAB_DISABLED=1` kill switch. `GET /healthz` for load balancers. Multi-stage Dockerfile.
 
 ### Prototype files (`grooveboard-claude-design/`)
 
@@ -72,6 +72,16 @@ npm test -- --run  # vitest single run
 npm run build    # tsc -b && vite build
 ```
 
+Collaboration service (Node + Socket.IO relay):
+```bash
+cd collab-service
+npm install
+npm run dev       # tsx watch (port 3001; frontend's default VITE_COLLAB_URL)
+npm run test:run  # vitest single run
+npm run build && npm start   # compile + run
+docker build -t grooveboard-collab .   # container image
+```
+
 ## Development Guidelines
 
 ### Test-Driven Development
@@ -98,10 +108,10 @@ When real (non-prototype) code is added, follow TDD: write tests before implemen
 - **Phase 3:** user auth, paid ad-free tier.
 - **Phase 4:** observability, performance, security hardening.
 
-### Planned WebSocket events (Phase 1)
-- `draw` — broadcast new stroke
-- `erase` — broadcast updated paths after erasure
-- `clear` — clear current page
+### WebSocket events (Phase 1 — implemented in `collab-service/src/protocol.ts`)
+- `draw` `{ page, stroke }` — broadcast new stroke
+- `erase` `{ page, strokes }` — broadcast the page's surviving strokes after erasure
+- `clear` `{ page }` — clear current page
 
 ## Observability Stack (planned, Phase 4)
 
