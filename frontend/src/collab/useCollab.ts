@@ -5,13 +5,15 @@
 //   draw  -> { page, stroke }
 //   erase -> { page, strokes }   (the page's strokes after an erasure)
 //   clear -> { page }
+//   state -> { paths }           (server -> client only: the board's current
+//                                 strokes, sent once on join as a replay)
 //
-// The relay is a dumb broadcaster (sender excluded), so what we send is exactly
-// what peers receive.
+// The relay broadcasts sender-excluded, so what we send is exactly what peers
+// receive; the server also applies events to its own copy to serve `state`.
 
 import { useEffect, useRef, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
-import type { Stroke } from '../drawing/types'
+import type { Paths, Stroke } from '../drawing/types'
 
 export interface DrawEvent {
   page: number
@@ -24,11 +26,16 @@ export interface EraseEvent {
 export interface ClearEvent {
   page: number
 }
+export interface StateEvent {
+  paths: Paths
+}
 
 export interface CollabHandlers {
   onDraw?: (e: DrawEvent) => void
   onErase?: (e: EraseEvent) => void
   onClear?: (e: ClearEvent) => void
+  /** The on-join replay of the board's current state (server-authoritative). */
+  onState?: (e: StateEvent) => void
 }
 
 export interface Collab {
@@ -61,6 +68,7 @@ export function useCollab(boardId: string, handlers: CollabHandlers): Collab {
     socket.on('draw', (e: DrawEvent) => handlersRef.current.onDraw?.(e))
     socket.on('erase', (e: EraseEvent) => handlersRef.current.onErase?.(e))
     socket.on('clear', (e: ClearEvent) => handlersRef.current.onClear?.(e))
+    socket.on('state', (e: StateEvent) => handlersRef.current.onState?.(e))
 
     return () => {
       socket.disconnect()

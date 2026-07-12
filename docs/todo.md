@@ -28,8 +28,15 @@
 - [x] Implement WebSocket server: connect, broadcast `draw`/`erase`/`clear` to peers on the same board (`collab-service/`, TDD — 29 tests)
 - [x] Decide data serialization (JSON for now; revisit if perf becomes an issue)
 - [x] Dockerfile for the service (multi-stage, non-root; image not yet built — Docker daemon wasn't running)
-- [ ] Run frontend + backend together locally; two browser tabs drawing on each other's boards
-  - relay verified live with scripted socket clients (relay/isolation/validation all pass); the visual two-tab check is the remaining step
+- [x] Run frontend + backend together locally; two browser tabs drawing on each other's boards (verified visually 2026-07-12)
+
+### Persistence (pulled forward from Phase 2 — "boards survive refresh" is MVP)
+- [x] Server-held room state + replay on join (`state` event; fixes refresh-loss and blank late-joins)
+- [x] `BoardStore` seam (`store.ts`): relay talks only to `load`/`save`; in-memory LRU-capped implementation for now
+- [x] Frontend applies the replay (`onState` replaces local paths; also resyncs after reconnect)
+- [x] Storage abuse cap: strokes-per-page limit (4000) — full pages stop accepting draws
+- [ ] DynamoDB `BoardStore` adapter (at deploy: one item per page — 400 KB item limit; TTL attribute for retention; debounced saves)
+- [ ] Decide retention policy (proposal: boards expire N days after last edit, via DynamoDB TTL)
 
 ### Deployment
 - [ ] Pick hosting (single EC2 vs. ECS Fargate — start with whichever is simpler)

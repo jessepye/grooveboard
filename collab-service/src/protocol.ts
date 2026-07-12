@@ -16,12 +16,17 @@ export interface Stroke {
   size: number
 }
 
+/** A board's strokes keyed by page index (mirrors the frontend's `Paths`). */
+export type Paths = Record<number, Stroke[]>
+
 export interface Limits {
   /** Server-wide cap on a single message, enforced by socket.io (`maxHttpBufferSize`). */
   maxPayloadBytes: number
   maxPointsPerStroke: number
   /** An erase event carries the page's surviving strokes — cap that array. */
   maxStrokesPerErase: number
+  /** Stored-state cap: a page that hits this stops accepting draws. */
+  maxStrokesPerPage: number
   maxConnectionsPerIp: number
   /** Steady-state messages/sec per connection. */
   ratePerSec: number
@@ -33,6 +38,7 @@ export const DEFAULT_LIMITS: Limits = {
   maxPayloadBytes: 512 * 1024,
   maxPointsPerStroke: 4000,
   maxStrokesPerErase: 4000,
+  maxStrokesPerPage: 4000,
   maxConnectionsPerIp: 20,
   ratePerSec: 40,
   rateBurst: 120,

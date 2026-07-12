@@ -13,7 +13,7 @@ The repo contains:
 - `grooveboard-claude-design/` — a **runnable design prototype** of the UI. Open `GrooveBoard.html` directly in a browser; no build step. It uses React 18 (UMD bundles from a CDN) plus `@babel/standalone` to compile JSX in the browser at page load. This is suitable for design iteration but **not** for production.
 - `docs/` — roadmap, todos, llm-guidelines.
 - `frontend/` — Vite 5 + React 18 + TypeScript. Tests via Vitest + React Testing Library (jsdom). The prototype's core drawing (pen/eraser/clear) has been ported into typed components (`src/components/`) with pure, tested logic in `src/drawing/` and the real-time relay client in `src/collab/`. Stickies, pages, zoom, themes, and live cursors are not yet ported (see `docs/todo.md`).
-- `collab-service/` — the Phase 1 backend: a stateless Node + Socket.IO relay (TypeScript, Vitest). One room per board (UUID required at handshake); validates then broadcasts `draw`/`erase`/`clear` to peers, sender excluded. Abuse limits built in: payload/point caps, per-connection token-bucket rate limiting, per-IP connection cap, `COLLAB_DISABLED=1` kill switch. `GET /healthz` for load balancers. Multi-stage Dockerfile.
+- `collab-service/` — the Phase 1 backend: a validating Node + Socket.IO relay with board state (TypeScript, Vitest). One room per board (UUID required at handshake); validates events, applies them to the room's server-held state, then broadcasts `draw`/`erase`/`clear` to peers, sender excluded. Joining clients get the board's current state as a `state` event (replay), so refreshes and late joins don't start blank. Persistence sits behind the `BoardStore` seam (`src/store.ts`): in-memory (LRU-capped) now, DynamoDB planned at deploy. Abuse limits built in: payload/point caps, strokes-per-page cap, per-connection token-bucket rate limiting, per-IP connection cap, `COLLAB_DISABLED=1` kill switch. `GET /healthz` for load balancers. Multi-stage Dockerfile.
 
 ### Prototype files (`grooveboard-claude-design/`)
 
@@ -112,6 +112,7 @@ When real (non-prototype) code is added, follow TDD: write tests before implemen
 - `draw` `{ page, stroke }` — broadcast new stroke
 - `erase` `{ page, strokes }` — broadcast the page's surviving strokes after erasure
 - `clear` `{ page }` — clear current page
+- `state` `{ paths }` — server→client only, sent once on join: the board's current strokes (replay for refreshes/late joiners)
 
 ## Observability Stack (planned, Phase 4)
 

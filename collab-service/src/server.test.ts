@@ -5,6 +5,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { io, type Socket } from 'socket.io-client'
 import { createCollabServer, type CollabServer, type CollabServerOptions } from './server.js'
+import { InMemoryBoardStore } from './store.js'
 
 const BOARD_A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
 const BOARD_B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
@@ -128,6 +129,116 @@ describe('connection policy', () => {
   it('refuses new connections when the kill switch is on', async () => {
     const port = await startServer({ acceptConnections: () => false })
     await expect(connect(port, BOARD_A)).rejects.toThrow(/unavailable/i)
+  })
+})
+
+// Every client receives a `state` snapshot on join. The listener must be
+// attached before the connection exists: the snapshot can arrive in the same
+// event-loop turn as the connect ack, and events with no listener are dropped.
+async function connectWithState(
+  port: number,
+  board: string,
+): Promise<{ socket: Socket; state: Promise<{ paths: Record<number, unknown[]> }> }> {
+  const socket = io(`http://127.0.0.1:${port}`, {
+    transports: ['websocket'],
+    reconnection: false,
+    query: { board },
+  })
+  clients.push(socket)
+  const state = new Promise<{ paths: Record<number, unknown[]> }>((resolve, reject) => {
+    socket.once('state', resolve)
+    setTimeout(() => reject(new Error('no state event within 2s')), 2000)
+  })
+  await new Promise<void>((resolve, reject) => {
+    socket.on('connect', () => resolve())
+    socket.on('connect_error', reject)
+  })
+  return { socket, state }
+}
+
+describe('board state & replay', () => {
+  it('sends empty state to the first client on a fresh board', async () => {
+    const port = await startServer()
+    const { state } = await connectWithState(port, BOARD_A)
+    expect(await state).toEqual({ paths: {} })
+  })
+
+  it('sends the current strokes to a client that joins mid-session', async () => {
+    const port = await startServer()
+    const { socket: alice, state: aliceState } = await connectWithState(port, BOARD_A)
+    await aliceState // wait until the server has finished setting the room up
+    alice.emit('draw', drawEvent(1))
+    await sleep(100)
+
+    const { state } = await connectWithState(port, BOARD_A)
+    expect(await state).toEqual({ paths: { 0: [drawEvent(1).stroke] } })
+  })
+
+  it('replays state after everyone has left (the refresh case)', async () => {
+    const port = await startServer()
+    const { socket: alice, state: aliceState } = await connectWithState(port, BOARD_A)
+    await aliceState
+    alice.emit('draw', drawEvent(1))
+    await sleep(100)
+    alice.disconnect()
+    await sleep(100)
+
+    const { state } = await connectWithState(port, BOARD_A)
+    expect(await state).toEqual({ paths: { 0: [drawEvent(1).stroke] } })
+  })
+
+  it('reflects erase and clear in the replayed state', async () => {
+    const port = await startServer()
+    const { socket: alice, state: aliceState } = await connectWithState(port, BOARD_A)
+    await aliceState
+    alice.emit('draw', drawEvent(1))
+    alice.emit('draw', drawEvent(2))
+    alice.emit('erase', { page: 0, strokes: [drawEvent(2).stroke] })
+    alice.emit('clear', { page: 1 })
+    await sleep(100)
+
+    const { state } = await connectWithState(port, BOARD_A)
+    expect(await state).toEqual({ paths: { 0: [drawEvent(2).stroke], 1: [] } })
+  })
+
+  it('does not leak state across boards', async () => {
+    const port = await startServer()
+    const { socket: alice, state: aliceState } = await connectWithState(port, BOARD_A)
+    await aliceState
+    alice.emit('draw', drawEvent(1))
+    await sleep(100)
+
+    const { state } = await connectWithState(port, BOARD_B)
+    expect(await state).toEqual({ paths: {} })
+  })
+
+  it('stops accepting draws once a page is at maxStrokesPerPage', async () => {
+    const port = await startServer({ limits: { maxStrokesPerPage: 2 } })
+    const { socket: alice, state: aliceState } = await connectWithState(port, BOARD_A)
+    const { socket: bob } = await connectWithState(port, BOARD_A)
+    await aliceState
+    const bobSaw = received(bob, 'draw')
+
+    for (let i = 0; i < 4; i++) alice.emit('draw', drawEvent(i))
+    await sleep(100)
+
+    // Only the first two land; the rest are dropped, not relayed.
+    expect(bobSaw).toEqual([drawEvent(0), drawEvent(1)])
+    const { state } = await connectWithState(port, BOARD_A)
+    expect(await state).toEqual({ paths: { 0: [drawEvent(0).stroke, drawEvent(1).stroke] } })
+  })
+
+  it('loads existing state from an injected store and persists changes back', async () => {
+    const store = new InMemoryBoardStore()
+    await store.save(BOARD_A, { 0: [drawEvent(9).stroke] })
+    const port = await startServer({ store })
+
+    const { socket: alice, state } = await connectWithState(port, BOARD_A)
+    expect(await state).toEqual({ paths: { 0: [drawEvent(9).stroke] } })
+
+    alice.emit('draw', drawEvent(1))
+    await sleep(100)
+    expect(await store.load(BOARD_A)).toEqual({ 0: [drawEvent(9).stroke, drawEvent(1).stroke] })
   })
 })
 

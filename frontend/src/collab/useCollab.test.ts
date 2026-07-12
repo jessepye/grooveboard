@@ -56,6 +56,15 @@ describe('useCollab', () => {
     expect(onClear).toHaveBeenCalledWith({ page: 2 })
   })
 
+  it('routes the on-join state snapshot to onState', () => {
+    const onState = vi.fn()
+    renderHook(() => useCollab('b', { onState }))
+
+    fire('state', { paths: { 0: [stroke] } })
+
+    expect(onState).toHaveBeenCalledWith({ paths: { 0: [stroke] } })
+  })
+
   it('emits draw/erase/clear with the protocol payloads', () => {
     const { result } = renderHook(() => useCollab('b', {}))
     act(() => result.current.sendDraw({ page: 0, stroke }))

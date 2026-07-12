@@ -92,4 +92,17 @@ describe('Whiteboard', () => {
     act(() => collab.handlers.onClear?.({ page: 0 }))
     expect(count()).toBe(0)
   })
+
+  it('replaces local paths with the state snapshot on join (replay)', () => {
+    render(<Whiteboard boardId="b" />)
+    act(() =>
+      collab.handlers.onState?.({
+        paths: { 0: [fakeStroke, { ...fakeStroke, id: 'y' }] },
+      }),
+    )
+    expect(count()).toBe(2)
+    // Replay is server-authoritative: it must not echo anything back out.
+    expect(collab.sendDraw).not.toHaveBeenCalled()
+    expect(collab.sendErase).not.toHaveBeenCalled()
+  })
 })

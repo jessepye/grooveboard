@@ -34,10 +34,13 @@ export default function Whiteboard({ boardId }: WhiteboardProps) {
   }, [])
 
   // Remote events from peers update local state but must NOT be re-broadcast.
+  // `state` is the on-join replay: the server's copy replaces ours wholesale
+  // (it also fires on reconnect, resyncing us after a dropped connection).
   const collab = useCollab(boardId, {
     onDraw: ({ page, stroke }) => addStroke(page, stroke),
     onErase: ({ page, strokes }) => setPageStrokes(page, strokes),
     onClear: ({ page }) => setPageStrokes(page, []),
+    onState: ({ paths: replayed }) => setPaths(replayed),
   })
 
   // Local actions: update state AND broadcast.
