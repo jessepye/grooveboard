@@ -23,9 +23,10 @@
 
 ### Backend & infrastructure
 
-- **Collaboration Service** (microservice 1): WebSocket service that broadcasts drawing data (coordinates, tool actions) to clients on the same board. Containerized via Docker.
-- **AWS:** basic VPC, EC2 (or ECS for the service initially; Kubernetes deferred to Phase 2), security groups.
-- **Frontend hosting:** static assets on S3.
+- **Collaboration Service** (microservice 1): WebSocket service that validates and broadcasts drawing data to clients on the same board, and holds each board's current state to replay on join. Containerized via Docker.
+- **Board persistence** (pulled forward from Phase 2, 2026-07: "boards survive refresh" is MVP): state behind the service's `BoardStore` interface — in-memory now; DynamoDB adapter with TTL-based retention when we deploy.
+- **AWS:** basic VPC, EC2 (or ECS for the service initially; Kubernetes deferred to Phase 2), security groups, DynamoDB table for board state.
+- **Frontend hosting:** static assets on S3 (or Vercel/Netlify to shrink the AWS surface — see todo).
 
 ### User experience
 
@@ -40,8 +41,9 @@
 
 ### Persistence
 
+- Basic persistence (boards survive refresh/restart) moved to Phase 1. What remains here:
 - Memorable, unique URL per board (still anonymous).
-- **Persistence Service** (microservice 2): saves/loads board state to a database (DynamoDB or RDS). Containerized.
+- **Persistence Service** (microservice 2): split board storage out of the Collaboration Service into its own service — only if/when scale or team structure warrants a second service.
 
 ### Kubernetes (EKS)
 

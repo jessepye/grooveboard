@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-GrooveBoard is a planned simple, real-time collaborative whiteboard application designed for ease of use (even for younger users). It is currently in **early Phase 1**: the visual UI exists as a prototype, but no real build pipeline, no backend, and no tests have been wired up yet. The full vision is a React/TypeScript frontend with a microservice backend on AWS — see `docs/roadmap.md`.
+GrooveBoard is a planned simple, real-time collaborative whiteboard application designed for ease of use (even for younger users). It is in **Phase 1**: a typed, tested React frontend and a Socket.IO collaboration service run together locally; nothing is deployed yet. The full vision is a React/TypeScript frontend with a microservice backend on AWS — see `docs/roadmap.md`.
 
 ## Current Repo State
 
@@ -12,8 +12,8 @@ The repo contains:
 
 - `grooveboard-claude-design/` — a **runnable design prototype** of the UI. Open `GrooveBoard.html` directly in a browser; no build step. It uses React 18 (UMD bundles from a CDN) plus `@babel/standalone` to compile JSX in the browser at page load. This is suitable for design iteration but **not** for production.
 - `docs/` — roadmap, todos, llm-guidelines.
-- No `frontend/` directory yet. A previous Create-React-App scaffold existed and was deleted in commit `9c38d03` when the design prototype was added.
-- No backend code yet.
+- `frontend/` — Vite 5 + React 18 + TypeScript. Tests via Vitest + React Testing Library (jsdom). The prototype's core drawing (pen/eraser/clear) has been ported into typed components (`src/components/`) with pure, tested logic in `src/drawing/` and the real-time relay client in `src/collab/`. Stickies, pages, zoom, themes, and live cursors are not yet ported (see `docs/todo.md`).
+- `collab-service/` — the Phase 1 backend: a validating Node + Socket.IO relay with board state (TypeScript, Vitest). One room per board (UUID required at handshake); validates events, applies them to the room's server-held state, then broadcasts `draw`/`erase`/`clear` to peers, sender excluded. Joining clients get the board's current state as a `state` event (replay), so refreshes and late joins don't start blank. Persistence sits behind the `BoardStore` seam (`src/store.ts`): in-memory (LRU-capped) now, DynamoDB planned at deploy. Abuse limits built in: payload/point caps, strokes-per-page cap, per-connection token-bucket rate limiting, per-IP connection cap, `COLLAB_DISABLED=1` kill switch. `GET /healthz` for load balancers. Multi-stage Dockerfile.
 
 ### Prototype files (`grooveboard-claude-design/`)
 
@@ -56,16 +56,31 @@ Coordinates are **logical page coordinates** (page is 1100×850 logical px for l
 
 ## Development Commands
 
-There are no build commands yet. To view the prototype:
-
+Prototype (no build step):
 ```bash
-# From the repo root
 open grooveboard-claude-design/GrooveBoard.html
-# or with a local server (avoids any future CORS issues):
-cd grooveboard-claude-design && python3 -m http.server 8000
+# or: cd grooveboard-claude-design && python3 -m http.server 8000
 ```
 
-Once a real `frontend/` is created (likely Vite + TS — see roadmap), this section should be updated with `npm install`, `npm run dev`, etc.
+Frontend (Vite + TS):
+```bash
+cd frontend
+npm install
+npm run dev      # dev server
+npm test         # vitest (watch)
+npm test -- --run  # vitest single run
+npm run build    # tsc -b && vite build
+```
+
+Collaboration service (Node + Socket.IO relay):
+```bash
+cd collab-service
+npm install
+npm run dev       # tsx watch (port 3001; frontend's default VITE_COLLAB_URL)
+npm run test:run  # vitest single run
+npm run build && npm start   # compile + run
+docker build -t grooveboard-collab .   # container image
+```
 
 ## Development Guidelines
 
@@ -93,10 +108,11 @@ When real (non-prototype) code is added, follow TDD: write tests before implemen
 - **Phase 3:** user auth, paid ad-free tier.
 - **Phase 4:** observability, performance, security hardening.
 
-### Planned WebSocket events (Phase 1)
-- `draw` — broadcast new stroke
-- `erase` — broadcast updated paths after erasure
-- `clear` — clear current page
+### WebSocket events (Phase 1 — implemented in `collab-service/src/protocol.ts`)
+- `draw` `{ page, stroke }` — broadcast new stroke
+- `erase` `{ page, strokes }` — broadcast the page's surviving strokes after erasure
+- `clear` `{ page }` — clear current page
+- `state` `{ paths }` — server→client only, sent once on join: the board's current strokes (replay for refreshes/late joiners)
 
 ## Observability Stack (planned, Phase 4)
 
