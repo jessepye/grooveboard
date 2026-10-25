@@ -1,48 +1,37 @@
 # Todo: GrooveBoard
 
-**Vision:** real-time collaborative whiteboard, ultra-simple UI, scalable backend. See `roadmap.md` for the long-term backlog.
+Task tracking for the current milestone. The plan behind it (phases, open decisions) is in `roadmap.md`.
 
-**Current goal:** finish Milestone 1 — two anonymous users can draw on the same board in real-time, with the backend deployed remotely.
+**Current goal:** Milestone 1. Two anonymous users on different networks draw on the same board in real time, with the backend deployed on AWS.
 
 ---
 
 ## Now
 
-- [x] Update `CLAUDE.md` and `docs/todo.md` to reflect actual repo state
+The deploy decisions, in order. Each one gates part of Deployment below.
+
+- [ ] AWS account and identity: root-user hygiene; IAM Identity Center or access keys for daily CLI use
+- [ ] Cost guardrails, set up the same day as the account: budget alert amounts, log retention, resource tags, a tear-it-all-down threshold
+- [ ] Where the relay runs: EC2 or ECS Fargate
+- [ ] Where the frontend lives: S3 + CloudFront, or Vercel/Netlify
+- [ ] TLS for `wss://`: what terminates it (follows from the relay hosting choice)
+- [ ] Board retention: how long an untouched board lives before expiring
+- [ ] Deploy credentials: manual deploys first, or GitHub Actions → AWS via OIDC now
 
 ---
 
 ## Next
 
-### Frontend foundation
-- [x] Decide build tooling: Vite + TypeScript (CRA is deprecated)
-- [x] Scaffold a real `frontend/` directory (now Vite 8 + React 19 + TS 6 on Node 26)
-- [x] Set up Vitest + React Testing Library (switched from Jest — native Vite integration)
-- [x] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components (pen/highlighter/eraser/clear, full floating toolbar with popovers; stickies/pages/zoom/themes deferred)
-- [x] Write tests for pen/eraser/clear before porting drawing logic (TDD) — 36 tests, pure geometry/stroke helpers + component + hook tests
-- [x] Replace `window.X` globals with proper ES module imports
-- [x] Wire Socket.IO client to the relay (`useCollab`, broadcasts/receives `draw`/`erase`/`clear`; board id from `?board=` UUID)
-
-### Backend (Collaboration Service)
-- [x] Pick stack (Node + Socket.IO is the path of least resistance, matches the frontend)
-- [x] Implement WebSocket server: connect, broadcast `draw`/`erase`/`clear` to peers on the same board (`collab-service/`, TDD — 29 tests)
-- [x] Decide data serialization (JSON for now; revisit if perf becomes an issue)
-- [x] Dockerfile for the service (multi-stage, non-root; image not yet built — Docker daemon wasn't running)
-- [x] Run frontend + backend together locally; two browser tabs drawing on each other's boards (verified visually 2026-07-12)
-
-### Persistence (pulled forward from Phase 2 — "boards survive refresh" is MVP)
-- [x] Server-held room state + replay on join (`state` event; fixes refresh-loss and blank late-joins)
-- [x] `BoardStore` seam (`store.ts`): relay talks only to `load`/`save`; in-memory LRU-capped implementation for now
-- [x] Frontend applies the replay (`onState` replaces local paths; also resyncs after reconnect)
-- [x] Storage abuse cap: strokes-per-page limit (4000) — full pages stop accepting draws
-- [ ] DynamoDB `BoardStore` adapter (at deploy: one item per page — 400 KB item limit; TTL attribute for retention; debounced saves)
-- [ ] Decide retention policy (proposal: boards expire N days after last edit, via DynamoDB TTL)
-
 ### Deployment
-- [ ] Pick hosting (single EC2 vs. ECS Fargate — start with whichever is simpler)
-- [ ] Deploy containerized service
-- [ ] Host static frontend (S3 + CloudFront, or Netlify/Vercel as an interim option)
-- [ ] Verify two users at the deployed URL can collaborate
+- [ ] Build the collab-service Docker image locally (never built yet)
+- [ ] Deploy the relay with TLS
+- [ ] Host the frontend; point `VITE_COLLAB_URL` at the relay
+- [ ] DynamoDB `BoardStore` adapter, TDD: one item per page (400 KB item limit), TTL attribute for expiry, debounced saves
+- [ ] Verify two people on different networks can collaborate at the deployed URL
+
+### Decide before building much more (see `roadmap.md` → Open decisions)
+- [ ] Sync model: per-stroke operations, or a CRDT (Yjs)? Spike before the DynamoDB adapter
+- [ ] Audience and monetization: under-13 users (COPPA), ads, and board safety features
 
 ---
 
@@ -62,7 +51,7 @@
 - [x] Use unguessable board IDs (UUIDs, not sequential) — server rejects non-UUID board ids at handshake
 - [x] Don't expose a public list of boards (no endpoint lists boards; the store is keyed by unguessable UUIDs)
 - [x] Add a feature flag / env var kill switch to disable new connections fast (`COLLAB_DISABLED=1`)
-- [ ] ~~Keep boards ephemeral in Phase 1~~ — superseded: persistence was pulled into Phase 1 (see Persistence above). Boards still need an expiry policy to keep abuse and legal surface small.
+- [ ] Boards expire after a period of no edits (see the retention decision in Now)
 
 ### Credential leaks
 - [x] Never commit `.env`; add to `.gitignore` from day one
@@ -71,18 +60,14 @@
 
 ### DDoS / network exposure
 - [ ] Front static assets with CloudFront (or use Vercel/Netlify) for free Shield Standard
-- [ ] Put the WebSocket service behind an ALB or CloudFront
-
-### Hosting split to shrink AWS surface
-- [ ] Consider deploying the frontend on Vercel/Netlify (free tier) and only the WebSocket service on AWS
+- [ ] Decide what fronts the WebSocket service (direct with TLS on the instance, ALB, or CloudFront); a single instance may not need an ALB yet
 
 ---
 
 ## Someday / Maybe
 
 ### Persistence & boards
-- Unique shareable board URLs (anonymous, persistent)
-- Board state save/load (DynamoDB or RDS)
+- Memorable board URLs (instead of raw UUIDs)
 - Board metadata (title, last-edited timestamp)
 
 ### Infrastructure
@@ -112,8 +97,6 @@
 
 ### Drawing features (deferred from prototype)
 - Shape tool
-- Sticky notes (already in prototype, needs porting)
-- Undo/redo (already in prototype as snapshot stack)
 - Multiple page sizes / themes (already in prototype via tweaks panel)
 
 ### Production hardening
@@ -127,5 +110,10 @@
 ## Done
 
 - Initial design prototype committed (`grooveboard-claude-design/`, May 2026)
-- Project roadmap drafted (`docs/roadmap.md`)
-- Observability stack plan documented (`CLAUDE.md`)
+- Roadmap drafted; reorganized to plan one milestone in detail (Oct 2026)
+- Frontend: Vite + React + TypeScript with Vitest + React Testing Library, now React 19 / Vite 8 / TS 6 on Node 26; prototype's drawing surface and floating toolbar ported test-first (pen, highlighter, pixel and whole-stroke eraser, clear, color/size and eraser-mode popovers); Socket.IO client wired up (Jun–Oct 2026)
+- Collab service: validating Socket.IO relay, test-first, with rate limiting, payload/point/connection caps, UUID-only board ids, `COLLAB_DISABLED` kill switch, multi-stage Dockerfile (Jul 2026)
+- Persistence pulled into Phase 1: server-held board state with replay on join and reconnect, `BoardStore` seam with an in-memory LRU implementation, 4000-strokes-per-page cap (Jul 2026)
+- Two browser tabs collaborating live, verified locally (Jul 2026)
+- `.gitignore`, GitHub secret scanning
+- Branches consolidated into `main`; superseded PRs closed (Oct 2026)
