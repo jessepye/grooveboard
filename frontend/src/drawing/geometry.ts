@@ -29,12 +29,15 @@ export interface EraseResult {
 
 /**
  * Remove every stroke whose nearest segment lies within `radius` of `p`,
- * accounting for the stroke's own half-width. Returns the original array
- * untouched when nothing is hit, so callers can skip redundant state updates.
+ * accounting for the stroke's own half-width. Pixel-eraser strokes are skipped:
+ * they're invisible, and removing one would restore the ink it rubbed out.
+ * Returns the original array untouched when nothing is hit, so callers can skip
+ * redundant state updates.
  */
 export function eraseStrokesAt(strokes: Stroke[], p: Point, radius: number): EraseResult {
   let changed = false
   const kept = strokes.filter(stroke => {
+    if (stroke.tool === 'eraser') return true
     const reach = radius + (stroke.size || 4) / 2
     const hit = stroke.points.some((pt, i) => {
       const next = stroke.points[i + 1] ?? pt

@@ -72,6 +72,13 @@ describe('DrawCanvas — eraser', () => {
     ],
   }
 
+  it('defaults to whole-stroke erasing', () => {
+    const { canvas, onErase, onCommitStroke } = setup({ tool: 'eraser', strokes: [horizontal] })
+    fireEvent.mouseDown(canvas, { clientX: 50, clientY: 0 })
+    expect(onErase).toHaveBeenCalled()
+    expect(onCommitStroke).not.toHaveBeenCalled()
+  })
+
   it('removes a stroke on contact and reports the survivors', () => {
     const { canvas, onErase } = setup({ tool: 'eraser', strokes: [horizontal] })
     fireEvent.mouseDown(canvas, { clientX: 50, clientY: 0 })
@@ -82,5 +89,19 @@ describe('DrawCanvas — eraser', () => {
     const { canvas, onErase } = setup({ tool: 'eraser', strokes: [horizontal] })
     fireEvent.mouseDown(canvas, { clientX: 50, clientY: 400 })
     expect(onErase).not.toHaveBeenCalled()
+  })
+
+  it('in pixel mode, commits an eraser stroke instead of deleting strokes', () => {
+    const { canvas, onErase, onCommitStroke } = setup({
+      tool: 'eraser',
+      eraserMode: 'pixel',
+      strokes: [horizontal],
+    })
+    fireEvent.mouseDown(canvas, { clientX: 40, clientY: 0 })
+    fireEvent.mouseMove(canvas, { clientX: 60, clientY: 0 })
+    fireEvent.mouseUp(canvas)
+    expect(onErase).not.toHaveBeenCalled()
+    expect(onCommitStroke).toHaveBeenCalledTimes(1)
+    expect(onCommitStroke.mock.calls[0][0].tool).toBe('eraser')
   })
 })

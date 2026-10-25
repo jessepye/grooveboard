@@ -1,8 +1,9 @@
 # frontend
 
-GrooveBoard's web client — Vite 5 + React 18 + TypeScript. Milestone 1 is a
-real-time collaborative whiteboard: anonymous users on the same board id draw on
-each other's canvas through the [collaboration service](../collab-service).
+GrooveBoard's web client — Vite 8 + React 19 + TypeScript, on Node 26 (see the
+root `.nvmrc`). Milestone 1 is a real-time collaborative whiteboard: anonymous
+users on the same board id draw on each other's canvas through the
+[collaboration service](../collab-service).
 
 ## Layout
 
@@ -16,7 +17,9 @@ src/
     useCollab.ts  Socket.IO client hook — sends/receives draw|erase|clear
   components/
     DrawCanvas.tsx  the drawing surface (pointer events -> strokes)
-    Toolbar.tsx     pen / eraser / color / size / clear
+    Toolbar.tsx     pen / highlighter / eraser, color+size and eraser-mode
+                    popovers, two-tap clear, dock position
+    Icon.tsx        the prototype's SVG icons (chunky / line styles)
     Whiteboard.tsx  lifted state; bridges canvas+toolbar to the relay
   board/
     boardId.ts    resolve/mint the board id from the URL (?board=<uuid>)
@@ -52,6 +55,6 @@ echo 'VITE_COLLAB_URL=https://collab.example.com' > .env.local
 
 ## Not yet ported (see `docs/todo.md`)
 
-Highlighter, sticky notes, multiple pages, zoom controls, themes, share modal,
+Sticky notes, multiple pages, zoom controls, themes, share modal,
 undo/redo, and live collaborator cursors. The relay only carries
 `draw`/`erase`/`clear`; cursor presence would be a new event.

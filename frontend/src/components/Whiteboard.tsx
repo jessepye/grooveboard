@@ -9,11 +9,18 @@ import { useCallback, useState } from 'react'
 import { useCollab } from '../collab/useCollab'
 import DrawCanvas from './DrawCanvas'
 import Toolbar from './Toolbar'
-import type { Paths, Stroke, Tool } from '../drawing/types'
+import type { DrawTool, EraserMode, Paths, Stroke, Tool } from '../drawing/types'
 
 const PAGE = 0
 const PAGE_W = 1100
 const PAGE_H = 850
+
+/** Each ink tool remembers its own color, so switching to the highlighter
+ * doesn't paint it in the pen's ink (matches the prototype). */
+const DEFAULT_TOOL_COLORS: Record<DrawTool, string> = {
+  pen: '#2A2118',
+  highlighter: '#F8E16C',
+}
 
 export interface WhiteboardProps {
   boardId: string
@@ -21,7 +28,12 @@ export interface WhiteboardProps {
 
 export default function Whiteboard({ boardId }: WhiteboardProps) {
   const [tool, setTool] = useState<Tool>('pen')
-  const [color, setColor] = useState('#2A2118')
+  const [toolColors, setToolColors] = useState(DEFAULT_TOOL_COLORS)
+  // The eraser lays down no ink; the canvas gets the pen's color for its cursor.
+  const colorTool: DrawTool = tool === 'eraser' ? 'pen' : tool
+  const color = toolColors[colorTool]
+  const setColor = (c: string) => setToolColors(prev => ({ ...prev, [colorTool]: c }))
+  const [eraserMode, setEraserMode] = useState<EraserMode>('stroke')
   const [size, setSize] = useState(4)
   const [paths, setPaths] = useState<Paths>({})
 
@@ -78,6 +90,7 @@ export default function Whiteboard({ boardId }: WhiteboardProps) {
         >
           <DrawCanvas
             tool={tool}
+            eraserMode={eraserMode}
             color={color}
             size={size}
             strokes={paths[PAGE] ?? []}
@@ -93,10 +106,12 @@ export default function Whiteboard({ boardId }: WhiteboardProps) {
       <Toolbar
         tool={tool}
         setTool={setTool}
-        color={color}
+        toolColors={toolColors}
         setColor={setColor}
         size={size}
         setSize={setSize}
+        eraserMode={eraserMode}
+        setEraserMode={setEraserMode}
         onClearPage={clearPage}
       />
     </div>
