@@ -1,6 +1,6 @@
 # Todo: GrooveBoard
 
-Task tracking for the current milestone. The plan behind it (phases, open decisions) is in `roadmap.md`.
+Task tracking for the current milestone. The plan behind it (phases, decisions) is in `roadmap.md`.
 
 **Current goal:** Milestone 1. Two anonymous users on different networks draw on the same board in real time, with the backend deployed on AWS.
 
@@ -8,41 +8,41 @@ Task tracking for the current milestone. The plan behind it (phases, open decisi
 
 ## Now
 
-The deploy decisions, in order. Each one gates part of Deployment below.
+AWS setup. Decisions are made (see `roadmap.md`); these are the steps.
 
-- [ ] AWS account and identity: root-user hygiene; IAM Identity Center or access keys for daily CLI use
-- [ ] Cost guardrails, set up the same day as the account: budget alert amounts, log retention, resource tags, a tear-it-all-down threshold
-- [ ] Where the relay runs: EC2 or ECS Fargate
-- [ ] Where the frontend lives: S3 + CloudFront, or Vercel/Netlify
-- [ ] TLS for `wss://`: what terminates it (follows from the relay hosting choice)
-- [ ] Board retention: how long an untouched board lives before expiring
-- [ ] Deploy credentials: manual deploys first, or GitHub Actions → AWS via OIDC now
+- [ ] Identity: permission set (AdministratorAccess), account assignment, first portal sign-in, `aws configure sso` (root is already locked down)
+- [ ] Cost guardrails, the same day: monthly budgets with email alerts at $10 / $25 / $50; free-tier usage alerts on; `project=grooveboard` tag activated for cost allocation. Kill threshold: $50 in a month means tear it all down
 
 ---
 
 ## Next
 
-### Deployment
-- [ ] Build the collab-service Docker image locally (never built yet)
-- [ ] Deploy the relay with TLS
-- [ ] Host the frontend; point `VITE_COLLAB_URL` at the relay
-- [ ] DynamoDB `BoardStore` adapter, TDD: one item per page (400 KB item limit), TTL attribute for expiry, debounced saves
-- [ ] Verify two people on different networks can collaborate at the deployed URL
+### Deploy #1 (Milestone 1)
+- [ ] Bump the collab-service `Dockerfile` base image from `node:20-alpine` (EOL April 2026) to `node:26-alpine`
+- [ ] Add a `docker-compose.yml`: the relay plus Caddy, with Caddy terminating TLS for `relay.grooveboard.online` and proxying to port 3001; Docker log files capped
+- [ ] Build and run the image locally once (it has never been built)
+- [ ] EC2: one `t4g.small` (Amazon Linux 2023, arm64) in `us-east-1`, default VPC, Elastic IP, security group open on 80 and 443 only, instance role with `AmazonSSMManagedInstanceCore`, everything tagged `project=grooveboard`
+- [ ] Route 53: `relay.grooveboard.online` A record → the Elastic IP
+- [ ] On the instance, via Session Manager: install Docker, clone the repo, `docker compose up -d --build` with `CORS_ORIGIN=https://grooveboard.online`
+- [ ] Netlify: connect the repo, base directory `frontend/`, `VITE_COLLAB_URL=https://relay.grooveboard.online`, custom domain `grooveboard.online` (records in Route 53)
+- [ ] Verify two people on different networks can collaborate at `grooveboard.online`
 
-### Decide before building much more (see `roadmap.md` → Open decisions)
-- [ ] Sync model: per-stroke operations, or a CRDT (Yjs)? Spike before the DynamoDB adapter
-- [ ] Audience and monetization: under-13 users (COPPA), ads, and board safety features
+### Milestone 2
+- [ ] Yjs spike: one `Y.Doc` per board, two tabs syncing; answer how the server still enforces size and rate limits
+- [ ] Move drawing state to Yjs, test-first; per-user undo via `Y.UndoManager`
+- [ ] DynamoDB `BoardStore` adapter for the Yjs document, test-first; TTL 30 days after the last edit (400 KB item limit)
+- [ ] GitHub Actions → AWS deploys via OIDC
 
 ---
 
 ## Risks & Mitigations (before going live)
 
 ### AWS bill surprises
-- [ ] Set AWS Budget alerts at $5 / $20 / $50 with email notifications
-- [ ] Set CloudWatch Logs retention to 7 days (default is "never expire")
+- [ ] Set AWS Budget alerts at $10 / $25 / $50 with email notifications (expected spend is about $17/month)
+- [ ] Cap Docker log files on the instance; if CloudWatch Logs is added later, set retention to 7 days (default is "never expire")
 - [ ] Tag all resources (`project=grooveboard`) so cost explorer can attribute spend
-- [ ] Avoid NAT Gateway (~$32/mo idle) and idle ALBs in early phases — start with a single small EC2
-- [ ] Mentally commit a hard kill threshold (e.g. "if bill > $X, tear it all down")
+- [x] Avoid NAT Gateway (~$32/mo idle) and idle ALBs in early phases — decided: one EC2 in a public subnet, no ALB
+- [x] Commit to a hard kill threshold: $50 in a month means tear it all down
 
 ### Abuse of an open anonymous real-time service
 - [x] Rate-limit per WebSocket connection (token bucket: 40 msg/s, burst 120; excess dropped)
@@ -51,16 +51,16 @@ The deploy decisions, in order. Each one gates part of Deployment below.
 - [x] Use unguessable board IDs (UUIDs, not sequential) — server rejects non-UUID board ids at handshake
 - [x] Don't expose a public list of boards (no endpoint lists boards; the store is keyed by unguessable UUIDs)
 - [x] Add a feature flag / env var kill switch to disable new connections fast (`COLLAB_DISABLED=1`)
-- [ ] Boards expire after a period of no edits (see the retention decision in Now)
+- [ ] Boards expire 30 days after the last edit (Milestone 2, with the DynamoDB adapter)
 
 ### Credential leaks
 - [x] Never commit `.env`; add to `.gitignore` from day one
-- [ ] Prefer IAM roles on EC2/ECS over long-lived access keys
+- [ ] Use an instance role on EC2, never access keys; humans sign in through Identity Center (no access keys exist)
 - [x] Confirm GitHub secret scanning is on for the repo
 
 ### DDoS / network exposure
-- [ ] Front static assets with CloudFront (or use Vercel/Netlify) for free Shield Standard
-- [ ] Decide what fronts the WebSocket service (direct with TLS on the instance, ALB, or CloudFront); a single instance may not need an ALB yet
+- [ ] Frontend on Netlify, whose CDN absorbs traffic spikes and DDoS for free
+- [x] Decide what fronts the WebSocket service: Caddy on the instance terminates TLS; no ALB for a single instance
 
 ---
 
