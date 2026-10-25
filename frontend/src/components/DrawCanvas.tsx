@@ -1,20 +1,23 @@
 // The drawing surface for one page. A typed port of the prototype's
 // `DrawCanvas`, with the geometry/stroke logic lifted into tested pure helpers.
 //
-// It owns no persistent state: pen/highlighter strokes are reported via
-// `onCommitStroke` on release, and stroke-erasures via `onErase` (the page's
-// surviving strokes). The parent decides how to store and broadcast them.
+// It owns no persistent state: pen/highlighter strokes (and pixel-eraser rubs)
+// are reported via `onCommitStroke` on release, and whole-stroke erasures via
+// `onErase` (the page's surviving strokes). The parent decides how to store and
+// broadcast them.
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { eraseStrokesAt } from '../drawing/geometry'
 import { createStroke } from '../drawing/stroke'
-import type { Point, Stroke, Tool } from '../drawing/types'
+import type { EraserMode, Point, Stroke, Tool } from '../drawing/types'
 
 /** Eraser hit radius in logical px (matches the prototype's stroke eraser). */
 const ERASER_RADIUS = 10
 
 export interface DrawCanvasProps {
   tool: Tool
+  /** How the eraser behaves; only read while the eraser is selected. */
+  eraserMode?: EraserMode
   color: string
   size: number
   /** Strokes for the page currently shown. */
@@ -30,6 +33,7 @@ export interface DrawCanvasProps {
 
 export default function DrawCanvas({
   tool,
+  eraserMode = 'stroke',
   color,
   size,
   strokes,
@@ -58,6 +62,7 @@ export default function DrawCanvas({
       ctx.strokeStyle = p.color
       ctx.lineWidth = p.size
       ctx.globalAlpha = p.tool === 'highlighter' ? 0.35 : 1
+      ctx.globalCompositeOperation = p.tool === 'eraser' ? 'destination-out' : 'source-over'
       ctx.moveTo(p.points[0].x, p.points[0].y)
       for (let i = 1; i < p.points.length; i++) {
         ctx.lineTo(p.points[i].x, p.points[i].y)
@@ -65,6 +70,7 @@ export default function DrawCanvas({
       ctx.stroke()
     }
     ctx.globalAlpha = 1
+    ctx.globalCompositeOperation = 'source-over'
   }, [strokes])
 
   // Size the backing store to the logical page, scaled up for crisp hi-DPI.
@@ -85,7 +91,7 @@ export default function DrawCanvas({
     redraw()
   }, [redraw])
 
-  const isDrawTool = tool === 'pen' || tool === 'highlighter'
+  const isStrokeEraser = tool === 'eraser' && eraserMode === 'stroke'
 
   /** Client coords -> logical page coords (undo the zoom). */
   const toLocal = (e: React.MouseEvent): Point => {
@@ -100,18 +106,18 @@ export default function DrawCanvas({
 
   const start = (e: React.MouseEvent) => {
     const p = toLocal(e)
-    if (tool === 'eraser') {
+    if (isStrokeEraser) {
       erasing.current = true
       eraseAt(p)
       return
     }
-    if (!isDrawTool) return
+    // Pen, highlighter, and the pixel eraser all lay down a stroke.
     current.current = createStroke(tool, color, size, p)
     setDrawing(true)
   }
 
   const move = (e: React.MouseEvent) => {
-    if (tool === 'eraser') {
+    if (isStrokeEraser) {
       if (erasing.current) eraseAt(toLocal(e))
       return
     }
@@ -146,7 +152,7 @@ export default function DrawCanvas({
       style={{
         position: 'absolute',
         inset: 0,
-        cursor: isDrawTool || tool === 'eraser' ? penCursor : 'default',
+        cursor: penCursor,
       }}
     />
   )

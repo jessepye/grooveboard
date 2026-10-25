@@ -10,18 +10,22 @@ export interface Point {
   y: number
 }
 
-/** Tools that produce a persisted stroke. `eraser` strokes are never persisted. */
+/** Tools that draw ink. */
 export type DrawTool = 'pen' | 'highlighter'
 
-/** Every selectable tool. `select` is a no-op placeholder for future features. */
+/** Every selectable tool. */
 export type Tool = DrawTool | 'eraser'
+
+/** What a persisted stroke can be: ink, or a pixel-eraser rub (drawn with
+ * `destination-out`, so it cuts through the ink beneath it). */
+export type StrokeTool = DrawTool | 'eraser'
 
 /** How the eraser behaves: rub out pixels, or delete a whole stroke on contact. */
 export type EraserMode = 'pixel' | 'stroke'
 
 export interface Stroke {
   id: string
-  tool: DrawTool
+  tool: StrokeTool
   color: string
   size: number
   points: Point[]

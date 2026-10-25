@@ -16,9 +16,9 @@
 
 ### Frontend foundation
 - [x] Decide build tooling: Vite + TypeScript (CRA is deprecated)
-- [x] Scaffold a real `frontend/` directory (Vite 5 + React 18 + TS)
+- [x] Scaffold a real `frontend/` directory (now Vite 8 + React 19 + TS 6 on Node 26)
 - [x] Set up Vitest + React Testing Library (switched from Jest — native Vite integration)
-- [x] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components (core pen/eraser/clear; stickies/pages/zoom/themes deferred)
+- [x] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components (pen/highlighter/eraser/clear, full floating toolbar with popovers; stickies/pages/zoom/themes deferred)
 - [x] Write tests for pen/eraser/clear before porting drawing logic (TDD) — 36 tests, pure geometry/stroke helpers + component + hook tests
 - [x] Replace `window.X` globals with proper ES module imports
 - [x] Wire Socket.IO client to the relay (`useCollab`, broadcasts/receives `draw`/`erase`/`clear`; board id from `?board=` UUID)
@@ -111,7 +111,6 @@
 - OpenSearch for log aggregation
 
 ### Drawing features (deferred from prototype)
-- Highlighter tool
 - Shape tool
 - Sticky notes (already in prototype, needs porting)
 - Undo/redo (already in prototype as snapshot stack)

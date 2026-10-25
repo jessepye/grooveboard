@@ -1,5 +1,5 @@
-/* Whiteboard editor layout. The prototype's toolbar was a floating pill with
-   per-tool popovers; Milestone 1 uses a simpler always-visible bottom bar. */
+/* Whiteboard editor layout. The toolbar is the prototype's floating pill with
+   per-tool popovers, docked to any edge via data-position. */
 
 .gb-board {
   position: fixed;
@@ -68,70 +68,239 @@
 /* ── Toolbar ─────────────────────────────────────────── */
 .gb-toolbar {
   position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 8px 14px;
+  gap: 4px;
+  padding: 8px;
   background: var(--gb-paper);
   border: var(--gb-stroke);
   border-radius: var(--gb-radius-pill);
   box-shadow: var(--gb-shadow-md);
   z-index: 50;
 }
-.gb-toolbar-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.gb-toolbar[data-position='bottom'],
+.gb-toolbar[data-position='top'] {
+  left: 50%;
+  transform: translateX(-50%);
 }
-.gb-tool {
-  height: 36px;
-  padding: 0 14px;
+.gb-toolbar[data-position='bottom'] { bottom: 24px; }
+.gb-toolbar[data-position='top'] { top: 84px; }
+.gb-toolbar[data-position='left'],
+.gb-toolbar[data-position='right'] {
+  flex-direction: column;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.gb-toolbar[data-position='left'] { left: 24px; }
+.gb-toolbar[data-position='right'] { right: 24px; }
+
+.gb-tool-slot {
+  position: relative;
+}
+.gb-tool,
+.gb-clear {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: none;
-  border-radius: var(--gb-radius-pill);
+  border-radius: 50%;
   background: transparent;
   color: var(--gb-ink);
-  font-size: 13px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .gb-tool[data-active='true'] {
   background: var(--gb-ink);
   color: var(--gb-paper);
 }
+/* Current-color bar under the pen/highlighter icons. */
+.gb-tool-color {
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 4px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+.gb-tool[data-active='true'] .gb-tool-color {
+  box-shadow: 0 0 0 1.5px var(--gb-paper);
+}
+/* Eraser-mode dot: mango = pixel, tomato = whole stroke. */
+.gb-tool-mode,
+.gb-mode-dot {
+  border-radius: 50%;
+  background: var(--gb-mango);
+}
+.gb-tool-mode[data-mode='stroke'],
+.gb-mode-dot[data-mode='stroke'] {
+  background: var(--gb-tomato);
+}
+.gb-tool-mode {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--gb-paper);
+}
+
+.gb-toolbar-divider {
+  width: 1px;
+  height: 28px;
+  margin: 0 4px;
+  background: var(--gb-line);
+}
+.gb-toolbar[data-position='left'] .gb-toolbar-divider,
+.gb-toolbar[data-position='right'] .gb-toolbar-divider {
+  width: 28px;
+  height: 1px;
+  margin: 4px 0;
+}
+
+/* ── Popovers (attached to a tool button) ────────────── */
+.gb-popover {
+  position: absolute;
+  background: var(--gb-paper);
+  border: var(--gb-stroke);
+  border-radius: 14px;
+  box-shadow: var(--gb-shadow-md);
+  padding: 10px;
+  z-index: 60;
+}
+.gb-toolbar[data-position='bottom'] .gb-popover { bottom: 56px; }
+.gb-toolbar[data-position='top'] .gb-popover { top: 56px; }
+.gb-toolbar[data-position='left'] .gb-popover { left: 56px; }
+.gb-toolbar[data-position='right'] .gb-popover { right: 56px; }
+.gb-toolbar[data-position='bottom'] .gb-popover,
+.gb-toolbar[data-position='top'] .gb-popover {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.gb-toolbar[data-position='left'] .gb-popover,
+.gb-toolbar[data-position='right'] .gb-popover {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.gb-popover-colors {
+  width: 168px;
+}
+.gb-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
 .gb-swatch {
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid var(--gb-ink);
   padding: 0;
 }
 .gb-swatch[data-active='true'] {
+  border-width: 3px;
   outline: 2px solid var(--gb-paper);
   outline-offset: -5px;
-  box-shadow: 0 0 0 2px var(--gb-ink);
 }
 .gb-size {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1.5px solid var(--gb-line);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
+  text-transform: uppercase;
   color: var(--gb-ink-soft);
 }
-.gb-clear {
-  height: 36px;
-  padding: 0 14px;
-  border: 1.5px solid var(--gb-line);
-  border-radius: var(--gb-radius-pill);
-  background: transparent;
+.gb-size input {
+  flex: 1;
+  min-width: 0;
+}
+
+.gb-popover-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 200px;
+}
+.gb-popover-title {
+  padding: 2px 4px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--gb-ink-soft);
+}
+.gb-mode {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  text-align: left;
+  border: var(--gb-stroke);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--gb-ink);
+}
+.gb-mode[data-active='true'] {
+  border: 1.5px solid var(--gb-ink);
+  background: var(--gb-bg-deep);
+}
+.gb-mode-dot {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--gb-ink);
+}
+.gb-mode-title {
+  display: block;
   font-size: 13px;
   font-weight: 600;
 }
+.gb-mode-desc {
+  display: block;
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--gb-ink-soft);
+}
+
+/* ── Clear (two-tap) ─────────────────────────────────── */
+.gb-clear {
+  color: var(--gb-ink-soft);
+}
 .gb-clear[data-armed='true'] {
-  border-color: var(--gb-accent);
-  background: var(--gb-accent);
+  background: var(--gb-tomato);
   color: var(--gb-paper);
 }
+.gb-clear-hint {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--gb-ink);
+  color: var(--gb-paper);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.gb-toolbar[data-position='top'] .gb-clear-hint {
+  bottom: auto;
+  top: 52px;
+}
+.gb-toolbar[data-position='left'] .gb-clear-hint,
+.gb-toolbar[data-position='right'] .gb-clear-hint {
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.gb-toolbar[data-position='left'] .gb-clear-hint { left: 52px; }
+.gb-toolbar[data-position='right'] .gb-clear-hint { left: auto; right: 52px; }

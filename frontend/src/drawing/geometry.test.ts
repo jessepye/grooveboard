@@ -64,6 +64,14 @@ describe('eraseStrokesAt', () => {
     expect(eraseStrokesAt([thick], { x: 50, y: 15 }, 2).changed).toBe(true)
   })
 
+  it('never removes pixel-eraser strokes', () => {
+    // They're invisible, so a whole-stroke erase passing over one must not
+    // delete it (that would bring back the ink it rubbed out).
+    const rub: Stroke = { ...horizontal, id: 'rub', tool: 'eraser' }
+    const result = eraseStrokesAt([rub], { x: 50, y: 0 }, 10)
+    expect(result.changed).toBe(false)
+  })
+
   it('is a no-op on an empty list', () => {
     const result = eraseStrokesAt([], { x: 0, y: 0 }, 10)
     expect(result.changed).toBe(false)

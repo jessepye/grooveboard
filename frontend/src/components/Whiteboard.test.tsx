@@ -30,11 +30,15 @@ const fakeStroke: Stroke = { id: 'x', tool: 'pen', color: '#000', size: 4, point
 vi.mock('./DrawCanvas', () => ({
   default: (props: {
     strokes: Stroke[]
+    color: string
+    eraserMode: string
     onCommitStroke: (s: Stroke) => void
     onErase: (s: Stroke[]) => void
   }) => (
     <div>
       <span data-testid="stroke-count">{props.strokes.length}</span>
+      <span data-testid="canvas-color">{props.color}</span>
+      <span data-testid="canvas-eraser-mode">{props.eraserMode}</span>
       <button onClick={() => props.onCommitStroke(fakeStroke)}>commit</button>
       <button onClick={() => props.onErase([])}>erase</button>
     </div>
@@ -104,5 +108,30 @@ describe('Whiteboard', () => {
     // Replay is server-authoritative: it must not echo anything back out.
     expect(collab.sendDraw).not.toHaveBeenCalled()
     expect(collab.sendErase).not.toHaveBeenCalled()
+  })
+
+  it('remembers a separate color for each tool', () => {
+    render(<Whiteboard boardId="b" />)
+    const canvasColor = () => screen.getByTestId('canvas-color').textContent
+    const pen = screen.getByRole('button', { name: /^pen$/i })
+    const highlighter = screen.getByRole('button', { name: /^highlighter$/i })
+
+    fireEvent.click(pen) // re-tap the active pen to open its colors
+    fireEvent.click(screen.getByRole('button', { name: /color tomato/i }))
+    expect(canvasColor()).toBe('#F25B3A')
+
+    fireEvent.click(highlighter)
+    expect(canvasColor()).toBe('#F8E16C') // highlighter keeps its own (lemon)
+
+    fireEvent.click(pen)
+    expect(canvasColor()).toBe('#F25B3A')
+  })
+
+  it('passes the chosen eraser mode to the canvas', () => {
+    render(<Whiteboard boardId="b" />)
+    expect(screen.getByTestId('canvas-eraser-mode').textContent).toBe('stroke')
+    fireEvent.click(screen.getByRole('button', { name: /^eraser$/i })) // opens modes
+    fireEvent.click(screen.getByRole('button', { name: /pixel eraser/i }))
+    expect(screen.getByTestId('canvas-eraser-mode').textContent).toBe('pixel')
   })
 })
