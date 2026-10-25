@@ -12,6 +12,7 @@ The repo contains:
 
 - `grooveboard-claude-design/` — a **runnable design prototype** of the UI. Open `GrooveBoard.html` directly in a browser; no build step. It uses React 18 (UMD bundles from a CDN) plus `@babel/standalone` to compile JSX in the browser at page load. This is suitable for design iteration but **not** for production.
 - `docs/` — roadmap, todos, llm-guidelines.
+- `deploy/` — `compose.yaml` + `Caddyfile`: how the relay runs on the EC2 instance (Caddy terminates TLS and proxies to the relay container).
 - `frontend/` — Vite 8 + React 19 + TypeScript 6. Tests via Vitest 4 + React Testing Library (jsdom). Targets Node 26 (root `.nvmrc`; `engines` + `engine-strict` in `frontend/.npmrc`). The prototype's core drawing (pen, highlighter, pixel and whole-stroke eraser, clear) and its floating toolbar (per-tool color/size popover, eraser-mode popover, dock positions, SVG icons) have been ported into typed components (`src/components/`) with pure, tested logic in `src/drawing/` and the real-time relay client in `src/collab/`. Stickies, pages, zoom, themes, and live cursors are not yet ported (see `docs/todo.md`).
 - `collab-service/` — the Phase 1 backend: a validating Node + Socket.IO relay with board state (TypeScript, Vitest). One room per board (UUID required at handshake); validates events, applies them to the room's server-held state, then broadcasts `draw`/`erase`/`clear` to peers, sender excluded. Joining clients get the board's current state as a `state` event (replay), so refreshes and late joins don't start blank. Persistence sits behind the `BoardStore` seam (`src/store.ts`): in-memory (LRU-capped) now, DynamoDB planned at deploy. Abuse limits built in: payload/point caps, strokes-per-page cap, per-connection token-bucket rate limiting, per-IP connection cap, `COLLAB_DISABLED=1` kill switch. `GET /healthz` for load balancers. Multi-stage Dockerfile.
 
@@ -80,6 +81,15 @@ npm run dev       # tsx watch (port 3001; frontend's default VITE_COLLAB_URL)
 npm run test:run  # vitest single run
 npm run build && npm start   # compile + run
 docker build -t grooveboard-collab .   # container image
+```
+
+Production relay (collab-service behind Caddy, which terminates TLS):
+```bash
+cd deploy
+docker compose up -d --build                        # serves relay.grooveboard.online
+RELAY_DOMAIN=localhost docker compose up -d --build # local try-out, self-signed cert
+docker compose logs -f relay
+docker compose down                                  # keeps the certificate volume; never add -v on the server
 ```
 
 ## Development Guidelines

@@ -1,0 +1,5 @@
+# Serve the relay over HTTPS. Caddy obtains and renews the certificate for
+# RELAY_DOMAIN on its own, and proxies WebSocket upgrades without extra config.
+{$RELAY_DOMAIN} {
+	reverse_proxy relay:3001
+}
