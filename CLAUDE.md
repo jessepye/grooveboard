@@ -87,7 +87,7 @@ docker build -t grooveboard-collab .   # container image
 ### Test-Driven Development
 When real (non-prototype) code is added, follow TDD: write tests before implementation. Per `docs/llm-guidelines.md`, this is a hard project rule.
 
-### Code Style (for the real frontend, when built)
+### Code Style
 - TypeScript with strict mode
 - React functional components with hooks
 - Props interfaces for all components
@@ -97,36 +97,21 @@ When real (non-prototype) code is added, follow TDD: write tests before implemen
 
 1. **Lifted state** — editor state centralized in `Whiteboard`; children are dumb.
 2. **Logical vs screen coordinates** — strokes stored in scale-independent page space.
-3. **Snapshot-based undo/redo** — `history` array of `{paths, stickies}` + `histIdx` pointer.
+3. **Snapshot-based undo/redo** — `history` array of `{paths, stickies}` + `histIdx` pointer. Single-user only: with collaborators it would undo other people's work, so multiplayer undo waits on the sync-model decision in `docs/roadmap.md`.
 4. **`useLayoutEffect` for layout reads** — fit-zoom is computed sync, before paint, to avoid one-frame flashes.
 5. **CSS-variable theming** — `data-theme="x"` on `<html>` swaps the whole palette.
 
-## Roadmap (see `docs/roadmap.md` for details)
+## Planning docs
 
-- **Phase 1 (current):** real-time anonymous drawing. WebSocket service, containerized, on AWS.
-- **Phase 2:** EKS, persistence service, ads.
-- **Phase 3:** user auth, paid ad-free tier.
-- **Phase 4:** observability, performance, security hardening.
+- `docs/roadmap.md`: vision, the current milestone in detail, open decisions, later phases sketched
+- `docs/todo.md`: the task list (Now / Next / Risks / Someday / Done)
 
-### WebSocket events (Phase 1 — implemented in `collab-service/src/protocol.ts`)
-- `draw` `{ page, stroke }` — broadcast new stroke
+Don't copy plan content into this file; point to those instead.
+
+## Wire protocol
+
+WebSocket events, implemented in `collab-service/src/protocol.ts`:
+- `draw` `{ page, stroke }` — broadcast new stroke (pixel-eraser rubs are strokes too, with `tool: 'eraser'`)
 - `erase` `{ page, strokes }` — broadcast the page's surviving strokes after erasure
 - `clear` `{ page }` — clear current page
 - `state` `{ paths }` — server→client only, sent once on join: the board's current strokes (replay for refreshes/late joiners)
-
-## Observability Stack (planned, Phase 4)
-
-Industry-standard stack to be integrated:
-
-- **Prometheus + M3DB** — metrics collection and long-term storage (drawing operations, sessions, WebSocket connections).
-- **OpenTelemetry** — distributed tracing across frontend and future services.
-- **OpenSearch** — centralized structured logging (migration target from Elastic + Splunk).
-- **ClickHouse** — analytics datastore for usage and behavior queries.
-
-Implementation order, when we get to it:
-1. OpenTelemetry SDK in the frontend
-2. Instrument drawing pipeline and WebSocket events
-3. Replace `console.log` with structured logging
-4. Prometheus metrics collection
-5. OTel Collector for aggregation
-6. ClickHouse schema design
