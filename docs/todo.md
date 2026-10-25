@@ -18,12 +18,12 @@ AWS setup. Decisions are made (see `roadmap.md`); these are the steps.
 ## Next
 
 ### Deploy #1 (Milestone 1)
-- [ ] Bump the collab-service `Dockerfile` base image from `node:20-alpine` (EOL April 2026) to `node:26-alpine`
-- [ ] Add a `docker-compose.yml`: the relay plus Caddy, with Caddy terminating TLS for `relay.grooveboard.online` and proxying to port 3001; Docker log files capped
-- [ ] Build and run the image locally once (it has never been built)
+- [x] Bump the collab-service `Dockerfile` base image from `node:20-alpine` (EOL April 2026) to `node:26-alpine`
+- [x] Add `deploy/compose.yaml` + `deploy/Caddyfile`: the relay plus Caddy, with Caddy terminating TLS for `relay.grooveboard.online` and proxying to port 3001; Docker log files capped
+- [x] Build and run the stack locally once (verified Oct 2026: healthcheck, HTTPS, HTTP→HTTPS redirect, `wss://` draw relay and replay through Caddy, clean shutdown)
 - [ ] EC2: one `t4g.small` (Amazon Linux 2023, arm64) in `us-east-1`, default VPC, Elastic IP, security group open on 80 and 443 only, instance role with `AmazonSSMManagedInstanceCore`, everything tagged `project=grooveboard`
 - [ ] Route 53: `relay.grooveboard.online` A record → the Elastic IP
-- [ ] On the instance, via Session Manager: install Docker, clone the repo, `docker compose up -d --build` with `CORS_ORIGIN=https://grooveboard.online`
+- [ ] On the instance, via Session Manager: install Docker and the Compose plugin, clone the repo, `cd deploy && docker compose up -d --build` (defaults already target `relay.grooveboard.online` and `https://grooveboard.online`)
 - [ ] Netlify: connect the repo, base directory `frontend/`, `VITE_COLLAB_URL=https://relay.grooveboard.online`, custom domain `grooveboard.online` (records in Route 53)
 - [ ] Verify two people on different networks can collaborate at `grooveboard.online`
 

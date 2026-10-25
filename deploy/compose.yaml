@@ -1,0 +1,59 @@
+# The relay as it runs on the EC2 instance: collab-service behind Caddy.
+#
+# Caddy terminates TLS for RELAY_DOMAIN (a free Let's Encrypt certificate,
+# renewed automatically) and proxies HTTP and WebSocket traffic to the relay.
+# Only Caddy publishes ports; the relay is reachable only inside this network.
+#
+#   cd deploy && docker compose up -d --build
+#
+# Settings come from the environment or a `.env` file next to this one:
+#   RELAY_DOMAIN     hostname Caddy serves (default relay.grooveboard.online;
+#                    use "localhost" to try it locally with a self-signed cert)
+#   CORS_ORIGIN      the frontend's origin (default https://grooveboard.online)
+#   COLLAB_DISABLED  "1" refuses new connections (kill switch)
+
+services:
+  relay:
+    build: ../collab-service
+    restart: unless-stopped
+    environment:
+      PORT: "3001"
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://grooveboard.online}
+      COLLAB_DISABLED: ${COLLAB_DISABLED:-0}
+    expose:
+      - "3001"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3001/healthz"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    logging: &capped-logs
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      relay:
+        condition: service_healthy
+    ports:
+      - "80:80"       # Let's Encrypt HTTP challenge, and redirects to HTTPS
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    environment:
+      RELAY_DOMAIN: ${RELAY_DOMAIN:-relay.grooveboard.online}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Certificates live here. Keep this volume: re-issuing on every
+      # restart would hit Let's Encrypt's rate limits.
+      - caddy_data:/data
+      - caddy_config:/config
+    logging: *capped-logs
+
+volumes:
+  caddy_data:
+  caddy_config:
