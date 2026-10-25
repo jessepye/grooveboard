@@ -1,0 +1,47 @@
+/* Design tokens — ported from grooveboard-claude-design/styles.css (Warm theme).
+   The prototype's full multi-theme system is deferred; Milestone 1 ships the
+   default palette. */
+:root {
+  --gb-bg: #f5f2ec;
+  --gb-bg-deep: #eae5da;
+  --gb-paper: #fbfaf6;
+  --gb-ink: #1f1d1a;
+  --gb-ink-soft: #6e695e;
+  --gb-line: #e0dacb;
+  --gb-accent: #c75a3c;
+
+  --gb-stroke: 1px solid var(--gb-line);
+  --gb-shadow-sm: 0 1px 2px rgba(31, 29, 26, 0.08);
+  --gb-shadow-md: 0 2px 8px rgba(31, 29, 26, 0.08), 0 1px 2px rgba(31, 29, 26, 0.06);
+  --gb-radius: 10px;
+  --gb-radius-pill: 999px;
+
+  --gb-font-body: 'Inter', 'Nunito', system-ui, sans-serif;
+  --gb-font-display: 'Fraunces', 'Recoleta', Georgia, serif;
+
+  font-family: var(--gb-font-body);
+  color: var(--gb-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--gb-bg);
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}

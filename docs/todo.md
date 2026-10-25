@@ -15,18 +15,28 @@
 ## Next
 
 ### Frontend foundation
-- [ ] Decide build tooling: Vite + TypeScript (CRA is deprecated)
-- [ ] Scaffold a real `frontend/` directory
-- [ ] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components
-- [ ] Set up Jest + React Testing Library; write tests for pen/eraser/clear before porting drawing logic
-- [ ] Replace `window.X` globals with proper ES module imports
+- [x] Decide build tooling: Vite + TypeScript (CRA is deprecated)
+- [x] Scaffold a real `frontend/` directory (Vite 5 + React 18 + TS)
+- [x] Set up Vitest + React Testing Library (switched from Jest — native Vite integration)
+- [x] Port the design prototype's `Whiteboard` + `DrawCanvas` + `Toolbar` into typed React components (core pen/eraser/clear; stickies/pages/zoom/themes deferred)
+- [x] Write tests for pen/eraser/clear before porting drawing logic (TDD) — 36 tests, pure geometry/stroke helpers + component + hook tests
+- [x] Replace `window.X` globals with proper ES module imports
+- [x] Wire Socket.IO client to the relay (`useCollab`, broadcasts/receives `draw`/`erase`/`clear`; board id from `?board=` UUID)
 
 ### Backend (Collaboration Service)
-- [ ] Pick stack (Node + Socket.IO is the path of least resistance, matches the frontend)
-- [ ] Implement WebSocket server: connect, broadcast `draw`/`erase`/`clear` to peers on the same board
-- [ ] Decide data serialization (JSON for now; revisit if perf becomes an issue)
-- [ ] Dockerfile for the service
-- [ ] Run frontend + backend together locally; two browser tabs drawing on each other's boards
+- [x] Pick stack (Node + Socket.IO is the path of least resistance, matches the frontend)
+- [x] Implement WebSocket server: connect, broadcast `draw`/`erase`/`clear` to peers on the same board (`collab-service/`, TDD — 29 tests)
+- [x] Decide data serialization (JSON for now; revisit if perf becomes an issue)
+- [x] Dockerfile for the service (multi-stage, non-root; image not yet built — Docker daemon wasn't running)
+- [x] Run frontend + backend together locally; two browser tabs drawing on each other's boards (verified visually 2026-07-12)
+
+### Persistence (pulled forward from Phase 2 — "boards survive refresh" is MVP)
+- [x] Server-held room state + replay on join (`state` event; fixes refresh-loss and blank late-joins)
+- [x] `BoardStore` seam (`store.ts`): relay talks only to `load`/`save`; in-memory LRU-capped implementation for now
+- [x] Frontend applies the replay (`onState` replaces local paths; also resyncs after reconnect)
+- [x] Storage abuse cap: strokes-per-page limit (4000) — full pages stop accepting draws
+- [ ] DynamoDB `BoardStore` adapter (at deploy: one item per page — 400 KB item limit; TTL attribute for retention; debounced saves)
+- [ ] Decide retention policy (proposal: boards expire N days after last edit, via DynamoDB TTL)
 
 ### Deployment
 - [ ] Pick hosting (single EC2 vs. ECS Fargate — start with whichever is simpler)
@@ -46,13 +56,13 @@
 - [ ] Mentally commit a hard kill threshold (e.g. "if bill > $X, tear it all down")
 
 ### Abuse of an open anonymous real-time service
-- [ ] Rate-limit per WebSocket connection (messages/sec and bytes/sec)
-- [ ] Cap stroke payload size and points-per-stroke server-side
-- [ ] Cap concurrent connections per IP
-- [ ] Use unguessable board IDs (UUIDs, not sequential)
-- [ ] Don't expose a public list of boards
-- [ ] Add a feature flag / env var kill switch to disable new connections fast
-- [ ] Keep boards ephemeral in Phase 1 — no persistence shrinks abuse and legal surface
+- [x] Rate-limit per WebSocket connection (token bucket: 40 msg/s, burst 120; excess dropped)
+- [x] Cap stroke payload size and points-per-stroke server-side (512 KB/message, 4000 points/stroke, full shape validation)
+- [x] Cap concurrent connections per IP (20)
+- [x] Use unguessable board IDs (UUIDs, not sequential) — server rejects non-UUID board ids at handshake
+- [x] Don't expose a public list of boards (no endpoint lists boards; the store is keyed by unguessable UUIDs)
+- [x] Add a feature flag / env var kill switch to disable new connections fast (`COLLAB_DISABLED=1`)
+- [ ] ~~Keep boards ephemeral in Phase 1~~ — superseded: persistence was pulled into Phase 1 (see Persistence above). Boards still need an expiry policy to keep abuse and legal surface small.
 
 ### Credential leaks
 - [x] Never commit `.env`; add to `.gitignore` from day one

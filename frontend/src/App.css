@@ -1,0 +1,137 @@
+/* Whiteboard editor layout. The prototype's toolbar was a floating pill with
+   per-tool popovers; Milestone 1 uses a simpler always-visible bottom bar. */
+
+.gb-board {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar ─────────────────────────────────────────── */
+.gb-board-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--gb-paper);
+  border-bottom: var(--gb-stroke);
+  z-index: 10;
+}
+.gb-logo-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: var(--gb-accent);
+  display: inline-block;
+}
+.gb-board-title {
+  font-family: var(--gb-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.gb-conn {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: var(--gb-radius-pill);
+  color: var(--gb-ink-soft);
+  background: var(--gb-bg-deep);
+}
+.gb-conn[data-online='true'] {
+  color: #1f5e43;
+  background: #d8efe3;
+}
+
+/* ── Canvas area ─────────────────────────────────────── */
+.gb-canvas-wrap {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: 32px;
+  background: var(--gb-bg);
+}
+.gb-page {
+  position: relative;
+  background: var(--gb-paper);
+  border: var(--gb-stroke);
+  border-radius: var(--gb-radius);
+  box-shadow: var(--gb-shadow-md);
+  flex-shrink: 0;
+}
+
+/* ── Toolbar ─────────────────────────────────────────── */
+.gb-toolbar {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  background: var(--gb-paper);
+  border: var(--gb-stroke);
+  border-radius: var(--gb-radius-pill);
+  box-shadow: var(--gb-shadow-md);
+  z-index: 50;
+}
+.gb-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gb-tool {
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--gb-radius-pill);
+  background: transparent;
+  color: var(--gb-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.gb-tool[data-active='true'] {
+  background: var(--gb-ink);
+  color: var(--gb-paper);
+}
+.gb-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--gb-ink);
+  padding: 0;
+}
+.gb-swatch[data-active='true'] {
+  outline: 2px solid var(--gb-paper);
+  outline-offset: -5px;
+  box-shadow: 0 0 0 2px var(--gb-ink);
+}
+.gb-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gb-ink-soft);
+}
+.gb-clear {
+  height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid var(--gb-line);
+  border-radius: var(--gb-radius-pill);
+  background: transparent;
+  color: var(--gb-ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+.gb-clear[data-armed='true'] {
+  border-color: var(--gb-accent);
+  background: var(--gb-accent);
+  color: var(--gb-paper);
+}
