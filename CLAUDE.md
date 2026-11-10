@@ -118,6 +118,26 @@ When real (non-prototype) code is added, follow TDD: write tests before implemen
 
 Don't copy plan content into this file; point to those instead.
 
+## Pull request descriptions
+
+Open every PR with a short opener a human can read in ten seconds, and fold the rest away:
+
+```markdown
+One to three plain sentences: what changed and why it matters, in words a user
+or reviewer recognizes. Add a screenshot when the change is visible.
+
+<details>
+<summary>Details (written by Claude Code)</summary>
+
+The full description: summary of changes, verification, caveats, follow-ups.
+
+</details>
+```
+
+- The opener is a draft for the owner's judgement. Make it the one thing worth reading; leave file lists, test counts and caveats for the details.
+- Nothing inside `<details>` may be something the reader must know before merging (a breaking change, a manual step, a risk). Put that in the opener.
+- Leave a blank line after `<summary>` and before `</details>` so GitHub renders the Markdown inside.
+
 ## Wire protocol
 
 WebSocket events, implemented in `collab-service/src/protocol.ts`:
